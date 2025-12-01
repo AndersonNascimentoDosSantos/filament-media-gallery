@@ -1,6 +1,6 @@
 {
     "name": "devanderson/filament-media-gallery",
-    "description": "This is my package filament-media-gallery",
+    "description": "An advanced media gallery plugin for Filament v3 with full support for images and videos, an integrated image editor, and automatic video thumbnail generation.",
     "keywords": [
         "devanderson",
         "laravel",
