@@ -1,39 +1,39 @@
 <?php
 
-namespace App\Traits;
+namespace Devanderson\FilamentMediaGallery\Traits;
 
-use App\Models\Video;
-use App\Models\Imagem;
+use Devanderson\FilamentMediaGallery\Models\Video;
+use Devanderson\FilamentMediaGallery\Models\Image as Imagem;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-trait ProcessaUploadGaleria
+trait HasMediaGallery
 {
     /**
-     * Cache de configurações dos campos para evitar buscas repetidas
+     * Cache for field configurations to avoid repeated lookups.
      */
     protected array $fieldConfigCache = [];
 
     /**
-     * Obtém as configurações de um campo de mídia.
+     * Gets the configuration for a media field.
      */
     protected function getFieldConfig(string $statePath): ?array
     {
-        // Remove o prefixo 'data.' se existir
+        // Remove the 'data.' prefix if it exists
         $key = str_starts_with($statePath, 'data.') ? substr($statePath, 5) : $statePath;
 
-        // Verifica se já está em cache
+        // Check if it's already in cache
         if (isset($this->fieldConfigCache[$key])) {
             return $this->fieldConfigCache[$key];
         }
 
-        \Log::info('ProcessaUploadGaleria: Buscando configuração do campo', [
+        \Log::info('MediaGalleryUpload: Fetching field configuration', [
             'statePath' => $statePath,
             'key' => $key
         ]);
 
-        // Tenta acessar o form se existir
+        // Try to access the form if it exists
         if (property_exists($this, 'form') && method_exists($this, 'form')) {
             try {
                 $form = $this->form($this->makeForm());
@@ -52,18 +52,18 @@ trait ProcessaUploadGaleria
                         ];
 
                         $this->fieldConfigCache[$key] = $config;
-                        \Log::info('ProcessaUploadGaleria: Configuração obtida do componente', $config);
+                        \Log::info('MediaGalleryUpload: Configuration obtained from component', $config);
                         return $config;
                     }
                 }
             } catch (\Exception $e) {
-                \Log::warning('ProcessaUploadGaleria: Erro ao acessar form', [
+                \Log::warning('MediaGalleryUpload: Error accessing form', [
                     'error' => $e->getMessage()
                 ]);
             }
         }
 
-        // Fallback: inferir pelo nome do campo
+        // Fallback: infer from the field name
         $config = $this->inferFieldConfig($key);
 
         if ($config) {
@@ -75,15 +75,15 @@ trait ProcessaUploadGaleria
     }
 
     /**
-     * Infere a configuração do campo baseado no nome
+     * Infers the field configuration based on its name.
      */
     protected function inferFieldConfig(string $fieldName): ?array
     {
-        \Log::info('ProcessaUploadGaleria: Inferindo configuração', [
+        \Log::info('MediaGalleryUpload: Inferring configuration', [
             'fieldName' => $fieldName
         ]);
 
-        // Detecta se é campo de vídeo ou imagem pelo nome
+        // Detects if it's a video or image field by name
         $isVideoField = str_contains(strtolower($fieldName), 'video');
 
         $config = [
@@ -94,18 +94,18 @@ trait ProcessaUploadGaleria
             'maxItems' => null,
         ];
 
-        \Log::info('ProcessaUploadGaleria: Configuração inferida', $config);
+        \Log::info('MediaGalleryUpload: Inferred configuration', $config);
 
         return $config;
     }
 
     /**
-     * Processa o upload de uma nova mídia (imagem ou vídeo).
+     * Processes the upload of a new media (image or video).
      */
     public function handleNewMediaUpload(string $uploadedFilename, string $statePath): void
     {
         try {
-            \Log::info('ProcessaUploadGaleria: Iniciando handleNewMediaUpload', [
+            \Log::info('MediaGalleryUpload: Starting handleNewMediaUpload', [
                 'uploadedFilename' => $uploadedFilename,
                 'statePath' => $statePath
             ]);
@@ -113,20 +113,20 @@ trait ProcessaUploadGaleria
             $config = $this->getFieldConfig($statePath);
 
             if (!$config) {
-                throw new \Exception("Não foi possível obter configuração do campo '$statePath'.");
+                throw new \Exception("Could not get configuration for field '$statePath'.");
             }
 
             $allowMultiple = $config['allowMultiple'];
             $mediaType = $config['mediaType'];
             $modelClass = $config['modelClass'];
 
-            \Log::info('ProcessaUploadGaleria: Configurações do campo', [
+            \Log::info('MediaGalleryUpload: Field settings', [
                 'mediaType' => $mediaType,
                 'modelClass' => $modelClass,
                 'allowMultiple' => $allowMultiple
             ]);
 
-            // Remove o prefixo 'data.' para acessar o array $this->data
+            // Remove the 'data.' prefix to access the $this->data array
             $dataKey = str_starts_with($statePath, 'data.') ? substr($statePath, 5) : $statePath;
 
             if (!$allowMultiple) {
@@ -139,8 +139,8 @@ trait ProcessaUploadGaleria
                 if (!empty($currentState)) {
                     Notification::make()
                         ->warning()
-                        ->title('Limite Atingido')
-                        ->body('Apenas uma mídia é permitida.')
+                        ->title('Limit Reached')
+                        ->body('Only one media item is allowed.')
                         ->send();
                     return;
                 }
@@ -149,46 +149,46 @@ trait ProcessaUploadGaleria
             $uploadKey = $dataKey . '_new_media';
             $tempFile = $this->data[$uploadKey] ?? null;
 
-            \Log::info('ProcessaUploadGaleria: Verificando arquivo temporário', [
+            \Log::info('MediaGalleryUpload: Checking temporary file', [
                 'uploadKey' => $uploadKey,
                 'tempFile_exists' => $tempFile !== null,
                 'tempFile_class' => $tempFile ? get_class($tempFile) : 'null'
             ]);
 
             if (!$tempFile instanceof TemporaryUploadedFile) {
-                throw new \Exception('Arquivo temporário não encontrado ou inválido.');
+                throw new \Exception('Temporary file not found or invalid.');
             }
 
-            $newPath = $tempFile->store('galeria', 'public');
+            $newPath = $tempFile->store('gallery', 'public');
 
-            \Log::info('ProcessaUploadGaleria: Arquivo armazenado', [
+            \Log::info('MediaGalleryUpload: File stored', [
                 'newPath' => $newPath,
                 'original_name' => $tempFile->getClientOriginalName()
             ]);
 
             $media = $modelClass::create([
                 'path' => $newPath,
-                'nome_original' => $tempFile->getClientOriginalName(),
+                'original_name' => $tempFile->getClientOriginalName(),
                 'mime_type' => $tempFile->getMimeType(),
-                'tamanho' => $tempFile->getSize(),
+                'size' => $tempFile->getSize(),
             ]);
 
             if ($mediaType === 'video') {
-                $thumbnail = $this->gerarThumbnailVideo($newPath);
+                $thumbnail = $this->generateVideoThumbnail($newPath);
 //dd($thumbnail);
                 if ($thumbnail) {
                     $media->update(['thumbnail_path' => $thumbnail]);
                 }
             }
 
-            \Log::info('ProcessaUploadGaleria: Mídia criada', [
+            \Log::info('MediaGalleryUpload: Media created', [
                 'media_id' => $media->id,
                 'model_class' => $modelClass
             ]);
 
             $currentState = $this->data[$dataKey] ?? [];
             if (is_string($currentState)) {
-                $currentState = json_decode($currentState, true) ?? [];
+                $currentState = json_decode($currentState, true) ?? []; // @phpstan-ignore-line
             }
             $currentState[] = $media->id;
             $this->data[$dataKey] = $currentState;
@@ -197,15 +197,15 @@ trait ProcessaUploadGaleria
 
             Notification::make()
                 ->success()
-                ->title('Upload Concluído')
-                ->body('A nova mídia foi adicionada.')
+                ->title('Upload Complete')
+                ->body('The new media has been added.')
                 ->send();
 
 //            dd($media->thumbnail_url);
-            $this->dispatch('galeria:media-adicionada', media: [
+            $this->dispatch('gallery:media-added', media: [
                 'id' => $media->id,
                 'url' => $media->url,
-                'nome_original' => $media->nome_original,
+                'original_name' => $media->original_name,
                 'is_video' => $mediaType === 'video',
                 'thumbnail_url' => ($mediaType === 'video' &&
                     method_exists($media, 'getThumbnailUrlAttribute'))
@@ -213,19 +213,19 @@ trait ProcessaUploadGaleria
                     : null,
             ]);
 
-            \Log::info('ProcessaUploadGaleria: Upload concluído com sucesso', [
+            \Log::info('MediaGalleryUpload: Upload completed successfully', [
                 'media_id' => $media->id
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('ProcessaUploadGaleria: Erro em handleNewMediaUpload', [
+            \Log::error('MediaGalleryUpload: Error in handleNewMediaUpload', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             Notification::make()
                 ->danger()
-                ->title('Erro no Upload')
+                ->title('Upload Error')
                 ->body($e->getMessage())
                 ->send();
 
@@ -234,41 +234,41 @@ trait ProcessaUploadGaleria
     }
 
     /**
-     * Processa o upload de uma imagem editada.
+     * Processes the upload of an edited image.
      */
     public function handleEditedMediaUpload($mediaId, $fileName, $statePath): void
     {
         try {
-            \Log::info('ProcessaUploadGaleria: Iniciando handleEditedMediaUpload', [
+            \Log::info('MediaGalleryUpload: Starting handleEditedMediaUpload', [
                 'mediaId' => $mediaId,
                 'fileName' => $fileName,
                 'statePath' => $statePath
             ]);
 
-            // Remove o prefixo 'data.' se existir
+            // Remove the 'data.' prefix if it exists
             $dataKey = str_starts_with($statePath, 'data.') ? substr($statePath, 5) : $statePath;
             $uploadKey = $dataKey . '_edited_media';
             $tempFile = $this->data[$uploadKey] ?? null;
 
             if (!$tempFile instanceof TemporaryUploadedFile) {
-                throw new \Exception('Arquivo editado não encontrado.');
+                throw new \Exception('Edited file not found.');
             }
 
-            $imagem = Imagem::find($mediaId);
-            if (!$imagem) {
-                throw new \Exception('A imagem original não foi encontrada.');
+            $image = Imagem::find($mediaId);
+            if (!$image) {
+                throw new \Exception('The original image was not found.');
             }
 
-            if (Storage::disk('public')->exists($imagem->path)) {
-                Storage::disk('public')->delete($imagem->path);
+            if (Storage::disk('public')->exists($image->path)) {
+                Storage::disk('public')->delete($image->path);
             }
 
-            $newPath = $tempFile->store('galeria', 'public');
+            $newPath = $tempFile->store('gallery', 'public');
 
-            $imagem->update([
+            $image->update([
                 'path' => $newPath,
-                'nome_original' => $fileName,
-                'tamanho' => $tempFile->getSize(),
+                'original_name' => $fileName,
+                'size' => $tempFile->getSize(),
                 'mime_type' => $tempFile->getMimeType(),
             ]);
 
@@ -276,23 +276,23 @@ trait ProcessaUploadGaleria
 
             Notification::make()
                 ->success()
-                ->title('Imagem Atualizada')
-                ->body('A imagem foi editada e salva.')
+                ->title('Image Updated')
+                ->body('The image has been edited and saved.')
                 ->send();
 
-            \Log::info('ProcessaUploadGaleria: Imagem editada com sucesso', [
-                'imagem_id' => $imagem->id
+            \Log::info('MediaGalleryUpload: Image edited successfully', [
+                'image_id' => $image->id
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('ProcessaUploadGaleria: Erro em handleEditedMediaUpload', [
+            \Log::error('MediaGalleryUpload: Error in handleEditedMediaUpload', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             Notification::make()
                 ->danger()
-                ->title('Erro ao Salvar')
+                ->title('Error Saving')
                 ->body($e->getMessage())
                 ->send();
 
@@ -301,46 +301,45 @@ trait ProcessaUploadGaleria
     }
 
     /**
-     * Carrega mais mídias para a galeria com paginação.
-     * AGORA FILTRA POR TIPO DE MÍDIA!
+     * Loads more media for the gallery with pagination, filtered by media type.
      */
-    public function carregarMaisMedias(int $pagina = 1, string $statePath): array
+    public function loadMoreMedia(int $page = 1, string $statePath): array
     {
         try {
-            \Log::info('ProcessaUploadGaleria: Carregando mais mídias', [
-                'pagina' => $pagina,
+            \Log::info('MediaGalleryUpload: Loading more media', [
+                'page' => $page,
                 'statePath' => $statePath
             ]);
 
             $config = $this->getFieldConfig($statePath);
 
             if (!$config) {
-                throw new \Exception("Não foi possível obter configuração do campo '$statePath'.");
+                throw new \Exception("Could not get configuration for field '$statePath'.");
             }
 
             $mediaType = $config['mediaType'];
             $modelClass = $config['modelClass'];
             $perPage = 24;
 
-            \Log::info('ProcessaUploadGaleria: Buscando mídias', [
+            \Log::info('MediaGalleryUpload: Fetching media', [
                 'mediaType' => $mediaType,
                 'modelClass' => $modelClass,
-                'pagina' => $pagina
+                'page' => $page
             ]);
 
-            // AQUI É A CHAVE: busca apenas do modelo correto (Imagem OU Video)
-            $medias = $modelClass::orderBy('created_at', 'desc')
-                ->paginate($perPage, ['*'], 'page', $pagina);
+            // Fetches only from the correct model (Image OR Video)
+            $mediaItems = $modelClass::orderBy('created_at', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
 
-            $mappedMedias = collect($medias->items())->map(function ($media) use ($mediaType) {
+            $mappedMedia = collect($mediaItems->items())->map(function ($media) use ($mediaType) {
                 $data = [
                     'id' => $media->id,
                     'url' => $media->url,
-                    'nome_original' => $media->nome_original,
+                    'original_name' => $media->original_name,
                     'is_video' => $mediaType === 'video',
                 ];
 
-                // Adiciona thumbnail_url para vídeos
+                // Add thumbnail_url for videos
                 if ($mediaType === 'video' && method_exists($media, 'getThumbnailUrlAttribute')) {
                     $data['thumbnail_url'] = $media->thumbnail_url;
                 }
@@ -348,22 +347,22 @@ trait ProcessaUploadGaleria
                 return $data;
             })->toArray();
 
-            \Log::info('ProcessaUploadGaleria: Mídias carregadas', [
+            \Log::info('MediaGalleryUpload: Media loaded', [
                 'mediaType' => $mediaType,
-                'total' => count($mappedMedias),
-                'hasMorePages' => $medias->hasMorePages()
+                'total' => count($mappedMedia),
+                'hasMorePages' => $mediaItems->hasMorePages()
             ]);
 
             return [
-                'medias' => $mappedMedias,
-                'temMais' => $medias->hasMorePages(),
+                'media' => $mappedMedia,
+                'hasMore' => $mediaItems->hasMorePages(),
             ];
         } catch (\Exception $e) {
-            \Log::error('ProcessaUploadGaleria: Erro em carregarMaisMedias', [
+            \Log::error('MediaGalleryUpload: Error in loadMoreMedia', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return ['medias' => [], 'temMais' => false];
+            return ['media' => [], 'hasMore' => false];
         }
     }
 }
