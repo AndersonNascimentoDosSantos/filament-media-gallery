@@ -1,52 +1,52 @@
 # 🎨 Filament Media Gallery
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/seu-usuario/filament-media-gallery.svg?style=flat-square)](https://packagist.org/packages/seu-usuario/filament-media-gallery)
-[![Total Downloads](https://img.shields.io/packagist/dt/seu-usuario/filament-media-gallery.svg?style=flat-square)](https://packagist.org/packages/seu-usuario/filament-media-gallery)
-[![License](https://img.shields.io/packagist/l/seu-usuario/filament-media-gallery.svg?style=flat-square)](https://packagist.org/packages/seu-usuario/filament-media-gallery)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/devanderson/filament-media-gallery.svg?style=flat-square)](https://packagist.org/packages/devanderson/filament-media-gallery)
+[![Total Downloads](https://img.shields.io/packagist/dt/devanderson/filament-media-gallery.svg?style=flat-square)](https://packagist.org/packages/devanderson/filament-media-gallery)
+[![License](https://img.shields.io/packagist/l/devanderson/filament-media-gallery.svg?style=flat-square)](https://packagist.org/packages/devanderson/filament-media-gallery)
 
-Um plugin avançado de galeria de mídia para Filament v4 com suporte completo para imagens e vídeos, editor de imagens integrado, geração automática de thumbnails para vídeos e muito mais.
+An advanced media gallery plugin for Filament v3 with full support for images and videos, an integrated image editor, automatic video thumbnail generation, and much more.
 
 ![Screenshot](https://via.placeholder.com/800x400?text=Plugin+Screenshot)
 
-## ✨ Recursos
+## ✨ Features
 
-### 📸 Imagens
-- ✅ Galeria unificada com paginação
-- ✅ Upload de múltiplas imagens
-- ✅ Editor integrado com Cropper.js
-- ✅ Suporte a aspect ratios customizáveis
-- ✅ Otimização automática de imagens
-- ✅ Formatos: JPG, PNG, WebP, GIF
+### 📸 Images
+- ✅ Unified gallery with pagination
+- ✅ Multiple image uploads
+- ✅ Integrated editor with Cropper.js
+- ✅ Support for custom aspect ratios
+- ✅ Automatic image optimization
+- ✅ Formats: JPG, PNG, WebP, GIF
 
-### 🎬 Vídeos
-- ✅ Upload de vídeos (MP4, WebM, MOV)
-- ✅ Geração automática de thumbnails via FFmpeg
-- ✅ Fallback para placeholders se FFmpeg não disponível
-- ✅ Preview de vídeos na galeria
-- ✅ Suporte a vídeos grandes (até 256MB por padrão)
+### 🎬 Videos
+- ✅ Video uploads (MP4, WebM, MOV)
+- ✅ Automatic thumbnail generation via FFmpeg
+- ✅ Fallback to placeholders if FFmpeg is not available
+- ✅ Video previews in the gallery
+- ✅ Support for large videos (up to 256MB by default)
 
-### 🎯 Geral
-- ✅ Interface moderna e responsiva
-- ✅ Dark mode compatível
-- ✅ Drag & drop para upload
-- ✅ Indicador de progresso de upload
-- ✅ Seleção múltipla ou única
-- ✅ Limite configurável de itens
-- ✅ Totalmente personalizável
+### 🎯 General
+- ✅ Modern and responsive interface
+- ✅ Dark mode compatible
+- ✅ Drag & drop for uploads
+- ✅ Upload progress indicator
+- ✅ Single or multiple selection
+- ✅ Configurable item limit
+- ✅ Fully customizable
 
 ---
 
-## 📦 Instalação
+## 📦 Installation
 
-### Requisitos
+### Requirements
 - PHP 8.1 ou superior
 - Laravel 10 ou superior
-- Filament 4.x
+- Filament 3.x
 
 ### Via Composer
 
 ```bash
-composer require seu-usuario/filament-media-gallery
+composer require devanderson/filament-media-gallery
 ```
 
 ### Publicar Assets e Configuração
@@ -80,7 +80,7 @@ php artisan storage:link
 ### Galeria de Imagens Simples
 
 ```php
-use SeuUsuario\FilamentMediaGallery\Forms\Components\MediaGallery;
+use DevAnderson\FilamentMediaGallery\Forms\Components\MediaGallery;
 
 MediaGallery::make('imagens_ids')
     ->label('Imagens')
@@ -158,7 +158,7 @@ MediaGallery::images('imagens_ids')
 ### Adicionar Trait ao Model
 
 ```php
-use SeuUsuario\FilamentMediaGallery\Traits\HasMediaGallery;
+use DevAnderson\FilamentMediaGallery\Traits\HasMediaGallery;
 
 class Post extends Model
 {
@@ -181,7 +181,7 @@ class Post extends Model
 ### Sincronizar Mídias no Resource
 
 ```php
-use SeuUsuario\FilamentMediaGallery\Traits\HasMediaGallery;
+use DevAnderson\FilamentMediaGallery\Traits\HasMediaGallery;
 
 class PostResource extends Resource
 {
@@ -382,7 +382,7 @@ MIT License. Veja [LICENSE](LICENSE.md) para mais detalhes.
 
 ## 👨‍💻 Créditos
 
-- [Seu Nome](https://github.com/seu-usuario)
+- [Seu Nome](https://github.com/devanderson)
 - [Todos os Contribuidores](../../contributors)
 
 Feito com ❤️ para a comunidade Filament
