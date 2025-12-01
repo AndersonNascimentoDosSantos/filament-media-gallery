@@ -152,7 +152,7 @@ trait ProcessesVideoThumbnails
     /**
      * Optimizes the thumbnail by resizing if necessary.
      */
-    protected function otimizarThumbnail(string $fullPath, int $maxWidth = 640): void
+    protected function optimizeThumbnail(string $fullPath, int $maxWidth = 640): void
     {
         try {
             if (!file_exists($fullPath)) {
