@@ -1,0 +1,5 @@
+<?php
+
+use Devanderson\FilamentMediaGallery\Tests\TestCase;
+
+uses(TestCase::class)->in(__DIR__);
