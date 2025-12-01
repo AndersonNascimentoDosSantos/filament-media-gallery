@@ -14,9 +14,9 @@ return new class extends Migration
             $table->id();
             $table->string('type'); // 'image' ou 'video'
             $table->string('path');
-            $table->string('nome_original');
+            $table->string('original_name');
             $table->string('mime_type');
-            $table->unsignedBigInteger('tamanho');
+            $table->unsignedBigInteger('size');
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->softDeletes();
