@@ -13,9 +13,9 @@ class Media extends Model
     protected $fillable = [
         'type',
         'path',
-        'nome_original',
+        'original_name',
         'mime_type',
-        'tamanho',
+        'size',
         'metadata',
     ];
 
@@ -33,7 +33,7 @@ class Media extends Model
     }
 
     /**
-     * Retorna a URL completa do arquivo
+     * Returns the full URL of the file.
      */
     public function getUrlAttribute(): string
     {
@@ -46,7 +46,7 @@ class Media extends Model
     }
 
     /**
-     * Relação polimórfica com Image
+     * Polymorphic relationship with Image.
      */
     public function image(): HasOne
     {
@@ -54,7 +54,7 @@ class Media extends Model
     }
 
     /**
-     * Relação polimórfica com Video
+     * Polymorphic relationship with Video.
      */
     public function video(): HasOne
     {
@@ -62,11 +62,11 @@ class Media extends Model
     }
 
     /**
-     * Formata o tamanho do arquivo
+     * Formats the file size.
      */
-    public function getTamanhoFormatadoAttribute(): string
+    public function getFormattedSizeAttribute(): string
     {
-        $bytes = $this->tamanho;
+        $bytes = $this->size;
 
         if ($bytes >= 1073741824) {
             return number_format($bytes / 1073741824, 2) . ' GB';
@@ -80,7 +80,7 @@ class Media extends Model
     }
 
     /**
-     * Deleta o arquivo ao remover o modelo
+     * Deletes the file when the model is removed.
      */
     protected static function booted(): void
     {

@@ -39,8 +39,8 @@ class Image extends Model
         return $this->media->url ?? '';
     }
 
-    public function getNomeOriginalAttribute(): string
+    public function getOriginalNameAttribute(): string
     {
-        return $this->media->nome_original ?? '';
+        return $this->media->original_name ?? '';
     }
 }

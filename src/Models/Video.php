@@ -41,9 +41,9 @@ class Video extends Model
         return $this->media->url ?? '';
     }
 
-    public function getNomeOriginalAttribute(): string
+    public function getOriginalNameAttribute(): string
     {
-        return $this->media->nome_original ?? '';
+        return $this->media->original_name ?? '';
     }
 
     public function getThumbnailUrlAttribute(): string
@@ -54,7 +54,7 @@ class Video extends Model
             return url('storage/' . $this->thumbnail_path);
         }
 
-        // Retorna placeholder
+        // Returns a placeholder
         return asset('vendor/filament-media-gallery/images/video-placeholder.png');
     }
 
@@ -67,7 +67,7 @@ class Video extends Model
     }
 
     /**
-     * Deleta o thumbnail ao remover o modelo
+     * Deletes the thumbnail when the model is removed.
      */
     protected static function booted(): void
     {
