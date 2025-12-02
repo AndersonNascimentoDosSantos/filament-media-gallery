@@ -39,7 +39,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
             });
-        $package->hasAssets(); // Adicionado: Declara que o pacote tem assets
+//        $package->hasAssets(); // Adicionado: Declara que o pacote tem assets
 
         $configFileName = $package->shortName();
 
