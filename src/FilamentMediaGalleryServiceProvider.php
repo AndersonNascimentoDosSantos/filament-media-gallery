@@ -34,7 +34,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
-                    ->publishAssets() // Adicionado: Publica os assets do pacote
+//                    ->publishAssets() // Adicionado: Publica os assets do pacote
                     ->publishMigrations()
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
