@@ -1,5 +1,9 @@
 <?php
 
+use Devanderson\FilamentMediaGallery\Models\Image;
+use Devanderson\FilamentMediaGallery\Models\Media;
+use Devanderson\FilamentMediaGallery\Models\Video;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -70,9 +74,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'models' => [
-        'media' => \Devanderson\FilamentMediaGallery\Models\Media::class,
-        'image' => \Devanderson\FilamentMediaGallery\Models\Image::class,
-        'video' => \Devanderson\FilamentMediaGallery\Models\Video::class,
+        'media' => Media::class,
+        'image' => Image::class,
+        'video' => Video::class,
     ],
 
     /*

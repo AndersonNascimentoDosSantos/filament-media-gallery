@@ -147,6 +147,9 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
     {
         return [
             'create_filament-media-gallery_table',
+            '0001_01_01_000004_create_media_table',
+            '0001_01_01_000005_create_images_table',
+            '0001_01_01_000006_create_videos_table'
         ];
     }
 }

@@ -7,10 +7,10 @@
         "filamentphp",
         "filament-media-gallery"
     ],
-    "homepage": "https://github.com/devanderson/filament-media-gallery",
+    "homepage": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery",
     "support": {
-        "issues": "https://github.com/devanderson/filament-media-gallery/issues",
-        "source": "https://github.com/devanderson/filament-media-gallery"
+        "issues": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery/issues",
+        "source": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery"
     },
     "license": "MIT",
     "authors": [
@@ -23,7 +23,8 @@
     "require": {
         "php": "^8.2",
         "filament/forms": "^4.0",
-        "spatie/laravel-package-tools": "^1.15.0"
+        "spatie/laravel-package-tools": "^1.15.0",
+        "intervention/image": "^2.7"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
