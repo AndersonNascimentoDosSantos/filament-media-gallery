@@ -37,13 +37,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
                     ->publishMigrations()
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
-            })
-            ->hasViews()
-            ->hasMigrations([
-                'create_media_table',
-                'create_images_table',
-                'create_videos_table',
-            ]);
+            });
 
         $configFileName = $package->shortName();
 

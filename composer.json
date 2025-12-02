@@ -1,35 +1,28 @@
 {
     "name": "devanderson/filament-media-gallery",
-    "description": "An advanced media gallery plugin for Filament v3 with full support for images and videos, an integrated image editor, and automatic video thumbnail generation.",
+    "description": "An advanced media gallery plugin for Filament v4 with full support for images and videos, an integrated image editor, and automatic video thumbnail generation.",
     "keywords": [
         "devanderson",
         "laravel",
-        "filament-media-gallery",
-        "filament",
-        "filament-plugin",
-        "media-gallery",
-        "image-gallery",
-        "video-gallery"
-            ],
-    "homepage": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery",
+        "filamentphp",
+        "filament-media-gallery"
+    ],
+    "homepage": "https://github.com/devanderson/filament-media-gallery",
     "support": {
-        "issues": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery/issues",
-        "source": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery"
+        "issues": "https://github.com/devanderson/filament-media-gallery/issues",
+        "source": "https://github.com/devanderson/filament-media-gallery"
     },
     "license": "MIT",
     "authors": [
         {
             "name": "Anderson Nascimento dos Santos",
-            "email": "tec.anderson.ns@gmail.com",
+            "email": "devandersonnascimentodossantos@gmail.com",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": "^8.1|^8.2|^8.3|^8.4",
-        "intervention/image": "^2.7|^3.0",
-        "filament/filament": "^4.0",
+        "php": "^8.2",
         "filament/forms": "^4.0",
-        "filament/tables": "^4.0",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {
@@ -60,15 +53,12 @@
     },
     "scripts": {
         "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
+        "analyse": "phpstan analyse",
+        "lint": "pint",
+        "refactor": "rector",
+        "test": "pest",
+        "test:lint": "pint --test",
+        "test:refactor": "rector --dry-run"
     },
     "extra": {
         "laravel": {
@@ -78,6 +68,14 @@
             "aliases": {
                 "FilamentMediaGallery": "Devanderson\\FilamentMediaGallery\\Facades\\FilamentMediaGallery"
             }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
         }
     },
     "minimum-stability": "dev",

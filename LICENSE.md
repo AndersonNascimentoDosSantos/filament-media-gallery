@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) devanderson <tec.anderson.ns@gmail.com>
+Copyright (c) devanderson <devandersonnascimentodossantos@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
