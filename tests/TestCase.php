@@ -4,6 +4,7 @@ namespace Devanderson\FilamentMediaGallery\Tests;
 
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
+use Devanderson\FilamentMediaGallery\FilamentMediaGalleryServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
 use Filament\Forms\FormsServiceProvider;
@@ -19,7 +20,6 @@ use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
-use Devanderson\FilamentMediaGallery\FilamentMediaGalleryServiceProvider;
 
 class TestCase extends Orchestra
 {

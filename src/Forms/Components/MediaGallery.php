@@ -2,21 +2,26 @@
 
 namespace Devanderson\FilamentMediaGallery\Forms\Components;
 
-use Filament\Forms\Components\Field;
 use Devanderson\FilamentMediaGallery\Models\Image;
 use Devanderson\FilamentMediaGallery\Models\Video;
+use Filament\Forms\Components\Field;
 
 class MediaGallery extends Field
 {
     protected string $view = 'filament-media-gallery::forms.components.media-gallery';
 
     protected string $mediaType = 'image'; // 'image' ou 'video'
+
     protected string $modelClass = Image::class;
 
     protected bool $allowUpload = true;
+
     protected bool $allowMultiple = true;
+
     protected ?int $maxItems = null;
+
     protected bool $allowImageEditor = false;
+
     protected array $imageEditorAspectRatios = ['16:9', '4:3', '1:1'];
 
     /**
@@ -24,7 +29,7 @@ class MediaGallery extends Field
      */
     public function mediaType(string $type): static
     {
-        if (!in_array($type, ['image', 'video'])) {
+        if (! in_array($type, ['image', 'video'])) {
             throw new \InvalidArgumentException("Tipo de mídia inválido. Use 'image' ou 'video'.");
         }
 
@@ -42,6 +47,7 @@ class MediaGallery extends Field
     public function allowUpload(bool $condition = true): static
     {
         $this->allowUpload = $condition;
+
         return $this;
     }
 
@@ -51,6 +57,7 @@ class MediaGallery extends Field
     public function allowMultiple(bool $condition = true): static
     {
         $this->allowMultiple = $condition;
+
         return $this;
     }
 
@@ -60,6 +67,7 @@ class MediaGallery extends Field
     public function maxItems(?int $max): static
     {
         $this->maxItems = $max;
+
         return $this;
     }
 
@@ -69,6 +77,7 @@ class MediaGallery extends Field
     public function imageEditor(bool $condition = true): static
     {
         $this->allowImageEditor = $condition;
+
         return $this;
     }
 
@@ -78,6 +87,7 @@ class MediaGallery extends Field
     public function imageEditorAspectRatios(array $ratios): static
     {
         $this->imageEditorAspectRatios = $ratios;
+
         return $this;
     }
 
@@ -107,7 +117,7 @@ class MediaGallery extends Field
 
         return [
             'medias' => $medias->toArray(),
-            'temMais' => $mediasPaginadas->hasMorePages()
+            'temMais' => $mediasPaginadas->hasMorePages(),
         ];
     }
 
