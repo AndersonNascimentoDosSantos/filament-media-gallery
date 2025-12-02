@@ -1,3 +1,3 @@
 # Security Policy
 
-If you discover any security related issues, please email tec.anderson.ns@gmail.com instead of using the issue tracker.
+If you discover any security related issues, please email devandersonnascimentodossantos@gmail.com instead of using the issue tracker.
