@@ -2,8 +2,8 @@
 
 namespace Devanderson\FilamentMediaGallery\Traits;
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
 trait ProcessesVideoThumbnails
@@ -11,8 +11,8 @@ trait ProcessesVideoThumbnails
     /**
      * Generates a thumbnail from a video using FFmpeg.
      *
-     * @param string $videoPath Path to the video in storage.
-     * @param float $timeInSeconds Time in seconds to capture the frame (default: 1s).
+     * @param  string  $videoPath  Path to the video in storage.
+     * @param  float  $timeInSeconds  Time in seconds to capture the frame (default: 1s).
      * @return string|null Path of the generated thumbnail or null on failure.
      */
     protected function generateVideoThumbnail(string $videoPath, float $timeInSeconds = 1.0): ?string
@@ -20,16 +20,18 @@ trait ProcessesVideoThumbnails
         try {
             $fullVideoPath = Storage::disk('public')->path($videoPath);
 
-            if (!file_exists($fullVideoPath)) {
+            if (! file_exists($fullVideoPath)) {
                 Log::error('VideoThumbnailProcess: Video not found', [
-                    'path' => $fullVideoPath
+                    'path' => $fullVideoPath,
                 ]);
+
                 return null;
             }
 
             // Check if FFmpeg is available
-            if (!$this->isFfmpegAvailable()) {
+            if (! $this->isFfmpegAvailable()) {
                 Log::warning('VideoThumbnailProcess: FFmpeg not available, trying alternative method');
+
                 return $this->generateAlternativeThumbnail($videoPath);
             }
 
@@ -39,7 +41,7 @@ trait ProcessesVideoThumbnails
 
             // Create directory if it doesn't exist
             $thumbnailDir = dirname($fullThumbnailPath);
-            if (!is_dir($thumbnailDir)) {
+            if (! is_dir($thumbnailDir)) {
                 mkdir($thumbnailDir, 0755, true);
             }
 
@@ -52,14 +54,14 @@ trait ProcessesVideoThumbnails
             );
 
             Log::info('VideoThumbnailProcess: Executing FFmpeg', [
-                'command' => $command
+                'command' => $command,
             ]);
 
             exec($command, $output, $returnCode);
 
             if ($returnCode === 0 && file_exists($fullThumbnailPath)) {
                 Log::info('VideoThumbnailProcess: Thumbnail generated successfully', [
-                    'thumbnail_path' => $thumbnailPath
+                    'thumbnail_path' => $thumbnailPath,
                 ]);
 
                 // Optimize the image (resize if it's too large)
@@ -70,7 +72,7 @@ trait ProcessesVideoThumbnails
 
             Log::error('VideoThumbnailProcess: Error generating thumbnail', [
                 'return_code' => $returnCode,
-                'output' => $output
+                'output' => $output,
             ]);
 
             return $this->generateAlternativeThumbnail($videoPath);
@@ -78,8 +80,9 @@ trait ProcessesVideoThumbnails
         } catch (\Exception $e) {
             Log::error('VideoThumbnailProcess: Exception while generating thumbnail', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }
@@ -90,6 +93,7 @@ trait ProcessesVideoThumbnails
     protected function isFfmpegAvailable(): bool
     {
         exec('ffmpeg -version 2>&1', $output, $returnCode);
+
         return $returnCode === 0;
     }
 
@@ -106,7 +110,7 @@ trait ProcessesVideoThumbnails
             $image = Image::canvas(640, 360, '#667eea');
 
             // Adiciona ícone de play
-            $image->text('▶', 320, 180, function($font) {
+            $image->text('▶', 320, 180, function ($font) {
                 $font->file(public_path('fonts/Arial.ttf') ?: null);
                 $font->size(120);
                 $font->color('#ffffff');
@@ -116,7 +120,7 @@ trait ProcessesVideoThumbnails
 
             // Add text
             $videoName = basename($videoPath);
-            $image->text($videoName, 320, 300, function($font) {
+            $image->text($videoName, 320, 300, function ($font) {
                 $font->file(public_path('fonts/Arial.ttf') ?: null);
                 $font->size(16);
                 $font->color('#ffffff');
@@ -129,22 +133,23 @@ trait ProcessesVideoThumbnails
 
             // Create directory if it doesn't exist
             $thumbnailDir = dirname($fullThumbnailPath);
-            if (!is_dir($thumbnailDir)) {
+            if (! is_dir($thumbnailDir)) {
                 mkdir($thumbnailDir, 0755, true);
             }
 
             $image->save($fullThumbnailPath, 85);
 
             Log::info('VideoThumbnailProcess: Alternative thumbnail generated', [
-                'thumbnail_path' => $thumbnailPath
+                'thumbnail_path' => $thumbnailPath,
             ]);
 
             return $thumbnailPath;
 
         } catch (\Exception $e) {
             Log::error('VideoThumbnailProcess: Error generating alternative thumbnail', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -155,7 +160,7 @@ trait ProcessesVideoThumbnails
     protected function optimizeThumbnail(string $fullPath, int $maxWidth = 640): void
     {
         try {
-            if (!file_exists($fullPath)) {
+            if (! file_exists($fullPath)) {
                 return;
             }
 
@@ -175,12 +180,12 @@ trait ProcessesVideoThumbnails
             Log::info('VideoThumbnailProcess: Thumbnail optimized', [
                 'path' => $fullPath,
                 'width' => $image->width(),
-                'height' => $image->height()
+                'height' => $image->height(),
             ]);
 
         } catch (\Exception $e) {
             Log::warning('VideoThumbnailProcess: Error optimizing thumbnail', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -188,8 +193,8 @@ trait ProcessesVideoThumbnails
     /**
      * Generates multiple thumbnails at different times in the video.
      *
-     * @param string $videoPath Path to the video.
-     * @param int $quantity Number of thumbnails to generate.
+     * @param  string  $videoPath  Path to the video.
+     * @param  int  $quantity  Number of thumbnails to generate.
      * @return array Array with the paths of the generated thumbnails.
      */
     protected function generateMultipleThumbnails(string $videoPath, int $quantity = 5): array
@@ -199,8 +204,9 @@ trait ProcessesVideoThumbnails
         try {
             $duration = $this->getVideoDuration($videoPath);
 
-            if (!$duration) {
+            if (! $duration) {
                 Log::warning('VideoThumbnailProcess: Could not get video duration');
+
                 return [$this->generateVideoThumbnail($videoPath)];
             }
 
@@ -216,12 +222,12 @@ trait ProcessesVideoThumbnails
             }
 
             Log::info('VideoThumbnailProcess: Multiple thumbnails generated', [
-                'quantity' => count($thumbnails)
+                'quantity' => count($thumbnails),
             ]);
 
         } catch (\Exception $e) {
             Log::error('VideoThumbnailProcess: Error generating multiple thumbnails', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
 
@@ -234,7 +240,7 @@ trait ProcessesVideoThumbnails
     protected function getVideoDuration(string $videoPath): ?float
     {
         try {
-            if (!$this->isFfmpegAvailable()) {
+            if (! $this->isFfmpegAvailable()) {
                 return null;
             }
 
@@ -248,15 +254,16 @@ trait ProcessesVideoThumbnails
             exec($command, $output, $returnCode);
 
             if ($returnCode === 0 && isset($output[0])) {
-                return (float)$output[0];
+                return (float) $output[0];
             }
 
             return null;
 
         } catch (\Exception $e) {
             Log::error('VideoThumbnailProcess: Error getting duration', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -266,7 +273,7 @@ trait ProcessesVideoThumbnails
      */
     protected function deleteThumbnail(?string $thumbnailPath): void
     {
-        if (!$thumbnailPath) {
+        if (! $thumbnailPath) {
             return;
         }
 
@@ -274,12 +281,12 @@ trait ProcessesVideoThumbnails
             if (Storage::disk('public')->exists($thumbnailPath)) {
                 Storage::disk('public')->delete($thumbnailPath);
                 Log::info('VideoThumbnailProcess: Thumbnail deleted', [
-                    'path' => $thumbnailPath
+                    'path' => $thumbnailPath,
                 ]);
             }
         } catch (\Exception $e) {
             Log::warning('VideoThumbnailProcess: Error deleting thumbnail', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
