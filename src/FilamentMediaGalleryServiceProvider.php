@@ -80,6 +80,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
             Js::make('cropper-js', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js'),
         ],  $this->getAssetPackageName());
 
+
         // Icon Registration
         FilamentIcon::register($this->getIcons());
 
