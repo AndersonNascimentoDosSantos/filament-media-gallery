@@ -74,6 +74,11 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
             $this->getScriptData(),
             $this->getAssetPackageName()
         );
+        // Registrar apenas Cropper.js (CDN externo)
+        FilamentAsset::register([
+            Css::make('cropper-css', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css'),
+            Js::make('cropper-js', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js'),
+        ],  $this->getAssetPackageName());
 
         // Icon Registration
         FilamentIcon::register($this->getIcons());
@@ -93,11 +98,6 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
 
     protected function getAssetPackageName(): ?string
     {
-        // Registrar apenas Cropper.js (CDN externo)
-        FilamentAsset::register([
-            Css::make('cropper-css', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css'),
-            Js::make('cropper-js', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js'),
-        ], package: 'devanderson/filament-media-gallery');
         return 'devanderson/filament-media-gallery';
     }
 
