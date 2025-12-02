@@ -34,10 +34,12 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
+                    ->publishAssets() // Adicionado: Publica os assets do pacote
                     ->publishMigrations()
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
             });
+        $package->hasAssets(); // Adicionado: Declara que o pacote tem assets
 
         $configFileName = $package->shortName();
 
@@ -91,6 +93,11 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
 
     protected function getAssetPackageName(): ?string
     {
+        // Registrar apenas Cropper.js (CDN externo)
+        FilamentAsset::register([
+            Css::make('cropper-css', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css'),
+            Js::make('cropper-js', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js'),
+        ], package: 'devanderson/filament-media-gallery');
         return 'devanderson/filament-media-gallery';
     }
 
@@ -99,11 +106,10 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
      */
     protected function getAssets(): array
     {
-        return [
-            // AlpineComponent::make('filament-media-gallery', __DIR__ . '/../resources/dist/components/filament-media-gallery.js'),
-            // Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css'),
-            // Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js'),
-        ];
+        return [];
+//            Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css'),
+//            Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js'),
+//        ];
     }
 
     /**
