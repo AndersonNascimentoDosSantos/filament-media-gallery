@@ -34,6 +34,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
+                    ->publishAssets()
                     ->publishMigrations()
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
@@ -45,6 +46,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
                 'create_videos_table',
             ])
             ->hasTranslations()
+            ->hasAssets()
         ;
 
         $configFileName = $package->shortName();
@@ -109,8 +111,8 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('filament-media-gallery', __DIR__ . '/../resources/dist/components/filament-media-gallery.js'),
-            Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css'),
-            Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js'),
+            Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css')->publishes(),
+            Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js')->publishes(),
         ];
     }
 
