@@ -47,4 +47,6 @@ compile({
     ...defaultOptions,
     entryPoints: ['./resources/js/index.js'],
     outfile: './resources/dist/filament-media-gallery.js',
+}).then(() => {
+    console.log(`Build completed for filament-media-gallery.js`)
 })

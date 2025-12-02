@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Facade;
  */
 class FilamentMediaGallery extends Facade
 {
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return \Devanderson\FilamentMediaGallery\FilamentMediaGallery::class;
     }

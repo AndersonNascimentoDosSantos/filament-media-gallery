@@ -3,4 +3,3 @@
 namespace Devanderson\FilamentMediaGallery;
 
 class FilamentMediaGallery {}
-
