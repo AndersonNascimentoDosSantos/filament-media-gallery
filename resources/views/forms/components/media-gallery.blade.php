@@ -406,10 +406,14 @@
                 Livewire.on('galeria:media-adicionada', ({ media }) => {
                     console.log('✨ Nova mídia adicionada:', media);
                     // Verifica se é do tipo correto antes de adicionar
-                    if (media.is_video === (this.mediaType === 'video')) {
-                        if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
-                            this.mediasDisponiveis.push(media);
-                        }
+                    if (media.is_video !== (this.mediaType === 'video')) {
+                        return;
+                    }
+
+                    // Adiciona a nova mídia à lista de mídias disponíveis se ainda não existir.
+                    if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
+                        // Adiciona no início para que apareça primeiro.
+                        this.mediasDisponiveis.unshift(media);
                     }
                 });
             },
@@ -504,6 +508,12 @@
                             .then(() => {
                                 console.log('✨ Processamento concluído');
                                 this.uploading = false;
+
+                                // Força a atualização do estado no Alpine.js para refletir a nova seleção.
+                                const currentState = this.$wire.get(config.statePath);
+                                if (Array.isArray(currentState)) {
+                                    this.selecionadas = [...currentState];
+                                }
                                 this.uploadProgress = '';
                                 event.target.value = '';
                             })
