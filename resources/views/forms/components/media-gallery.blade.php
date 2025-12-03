@@ -10,27 +10,17 @@
    $allowMultiple = $getAllowMultiple();
    $maxItems = $getMaxItems();
    $allowUpload = $getAllowUpload();
-   $allowImageEditor = $getAllowImageEditor() && $mediaType === 'image'; // Editor só para imagens
+   $allowImageEditor = $getAllowImageEditor() && $mediaType === 'image'; // Editor só para imagems
     $imageEditorAspectRatios = $getImageEditorAspectRatios();
     $dadosIniciaisGaleria = $getMediasDisponiveis();
 
    // IMPORTANTE: Busca apenas as mídias DO TIPO CORRETO que já estão selecionadas
-   $mediasSelecionadasInicialmente = collect($getState() ?? [])
-    ->map(function($id) use ($modelClass, $mediaType) {
-        $media = $modelClass::find($id);
-        if (!$media) return null;
-
-        return [
-            'id' => $media->id,
-            'url' => $media->url ?? '',
-            'nome_original' => $media->nome_original ?? 'Sem nome',
-            'is_video' => $mediaType === 'video',
-            'thumbnail_url' => $mediaType === 'video' && method_exists($media, 'getThumbnailUrlAttribute')
-                ? $media->thumbnail_url
-                : null,
-        ];
-    })
-    ->filter(); // Remove nulls
+   $mediasSelecionadasInicialmente = $modelClass::find($getState() ?? [])->map(fn ($media) => [
+       'id' => $media->id,
+       'url' => $media->url,
+       'nome_original' => $media->nome_original,
+       'is_video' => $mediaType === 'video',
+   ]);
 
    $fieldId = 'galeria-midia-' . $getStatePath();
 @endphp
@@ -40,18 +30,17 @@
         wire:key="{{ $fieldId }}"
         wire:ignore.self
         x-data="imageGalleryPicker({
-            state: $wire.get('{{ $getStatePath() }}') || [],
-            statePath: '{{ $getStatePath() }}',
-            mediaType: @js($mediaType),
-            initialMedias: @js($dadosIniciaisGaleria['medias']),
-            temMaisPaginas: @js($dadosIniciaisGaleria['temMais']),
-            allowMultiple: @js($allowMultiple),
-            maxItems: @js($maxItems),
-            aspectRatios: @js($imageEditorAspectRatios ?? [])
-        })"
+             state: $wire.get('{{ $getStatePath() }}') || [],
+             statePath: '{{ $getStatePath() }}',
+             mediaType: @js($mediaType),
+             initialMedias: @js($dadosIniciaisGaleria['medias']),
+             temMaisPaginas: @js($dadosIniciaisGaleria['temMais']),
+             allowMultiple: @js($allowMultiple),
+             maxItems: @js($maxItems),
+             aspectRatios: @js($imageEditorAspectRatios ?? [])
+         })"
         x-init="init()"
     >
-
         {{-- Mídias Selecionadas --}}
         <div x-show="selecionadas.length > 0" class="g-section">
             <label class="g-label">
@@ -62,11 +51,11 @@
                 <template x-for="media in mediasDisponiveis" :key="media.id">
                     <div x-show="isSelected(media.id)" class="g-thumbnail g-thumbnail-selected group">
                         {{-- Preview de Imagem --}}
-                        <template x-if="!media.is_video">
+                        <template x-if="mediaType === 'image' && !media.is_video">
                             <img :src="media.url" :alt="media.nome_original">
                         </template>
                         {{-- Preview de Vídeo (usa thumbnail se disponível) --}}
-                        <template x-if="media.is_video">
+                        <template x-if="mediaType === 'video' && media.is_video">
                             <div class="g-video-preview">
                                 <template x-if="media.thumbnail_url">
                                     <img :src="media.thumbnail_url" :alt="media.nome_original" class="g-video-thumbnail">
@@ -213,10 +202,10 @@
                                      :class="{ 'g-modal-thumb-selected': isSelected(media.id) }"
                                      class="g-modal-thumb">
                                     {{-- Exibe imagem OU vídeo baseado no mediaType do campo --}}
-                                    <template x-if="!media.is_video">
+                                    <template x-if="mediaType === 'image' && !media.is_video">
                                         <img :src="media.url" :alt="media.nome_original" class="g-modal-thumb-img">
                                     </template>
-                                    <template x-if="media.is_video">
+                                    <template x-if="mediaType === 'video' && media.is_video">
                                         <div class="g-video-preview g-modal-video-preview">
                                             <template x-if="media.thumbnail_url">
                                                 <img :src="media.thumbnail_url" :alt="media.nome_original" class="g-modal-thumb-img">
