@@ -409,7 +409,7 @@
                     });
                 });
 
-                Livewire.on('galeria:media-adicionada', ({ media }) => {
+                Livewire.on('gallery:media-added', ({ media }) => {
                     console.log('✨ Nova mídia adicionada:', media);
                     // Verifica se é do tipo correto antes de adicionar
                     if (media.is_video !== (this.mediaType === 'video')) {
