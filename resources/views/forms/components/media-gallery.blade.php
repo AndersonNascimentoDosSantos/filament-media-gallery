@@ -52,11 +52,11 @@
                 <template x-for="media in mediasDisponiveis" :key="media.id">
                     <div x-show="isSelected(media.id)" class="g-thumbnail g-thumbnail-selected group">
                         {{-- Preview de Imagem --}}
-                        <template x-if="mediaType === 'image' && !media.is_video">
+                        <template x-if="!media.is_video">
                             <img :src="media.url" :alt="media.nome_original">
                         </template>
                         {{-- Preview de Vídeo (usa thumbnail se disponível) --}}
-                        <template x-if="mediaType === 'video' && media.is_video">
+                        <template x-if="media.is_video">
                             <div class="g-video-preview">
                                 <template x-if="media.thumbnail_url">
                                     <img :src="media.thumbnail_url" :alt="media.nome_original" class="g-video-thumbnail">
@@ -203,10 +203,10 @@
                                      :class="{ 'g-modal-thumb-selected': isSelected(media.id) }"
                                      class="g-modal-thumb">
                                     {{-- Exibe imagem OU vídeo baseado no mediaType do campo --}}
-                                    <template x-if="mediaType === 'image' && !media.is_video">
+                                    <template x-if="!media.is_video">
                                         <img :src="media.url" :alt="media.nome_original" class="g-modal-thumb-img">
                                     </template>
-                                    <template x-if="mediaType === 'video' && media.is_video">
+                                    <template x-if="media.is_video">
                                         <div class="g-video-preview g-modal-video-preview">
                                             <template x-if="media.thumbnail_url">
                                                 <img :src="media.thumbnail_url" :alt="media.nome_original" class="g-modal-thumb-img">
