@@ -166,34 +166,41 @@ trait HasMediaGallery
                 'original_name' => $tempFile->getClientOriginalName()
             ]);
 
-            $media = $modelClass::create([
-                'path' => $newPath,
-                'original_name' => $tempFile->getClientOriginalName(),
-                'mime_type' => $tempFile->getMimeType(),
-                'size' => $tempFile->getSize(),
-            ]);
+            // 1. Cria o registro principal na tabela 'media'
+             $media = \Devanderson\FilamentMediaGallery\Models\Media::create([
+                 'type' => $mediaType,
+                 'path' => $newPath,
+                 'original_name' => $tempFile->getClientOriginalName(),
+                 'mime_type' => $tempFile->getMimeType(),
+                 'size' => $tempFile->getSize()
+             ]);
+
+             // 2. Cria o registro específico (Image ou Video) e o associa
+             $specificMedia = new $modelClass();
+             $specificMedia->media_id = $media->id;
+             $specificMedia->save();
 
             if ($mediaType === 'video') {
                 $thumbnail = $this->generateVideoThumbnail($newPath);
-//dd($thumbnail);
+                //dd($thumbnail);
                 if ($thumbnail) {
-                    $media->update(['thumbnail_path' => $thumbnail]);
+                    $specificMedia->update(['thumbnail_path' => $thumbnail]);
                 }
             }
 
+
             \Log::info('MediaGalleryUpload: Media created', [
                 'media_id' => $media->id,
-                'model_class' => $modelClass
+                'specific_media_id' => $specificMedia->id,
+                'model_class' => get_class($specificMedia)
             ]);
 
             $currentState = $this->data[$dataKey] ?? [];
             if (is_string($currentState)) {
                 $currentState = json_decode($currentState, true) ?? []; // @phpstan-ignore-line
             }
-            $currentState[] = $media->id;
+            $currentState[] = $specificMedia->id;
             $this->data[$dataKey] = $currentState;
-
-            $this->data[$uploadKey] = null;
 
             Notification::make()
                 ->success()
@@ -201,15 +208,14 @@ trait HasMediaGallery
                 ->body('The new media has been added.')
                 ->send();
 
-//            dd($media->thumbnail_url);
+            //            dd($media->thumbnail_url);
             $this->dispatch('gallery:media-added', media: [
-                'id' => $media->id,
-                'url' => $media->url,
-                'original_name' => $media->original_name,
+                'id' => $specificMedia->id,
+                'url' => $specificMedia->url,
+                'original_name' => $specificMedia->original_name,
                 'is_video' => $mediaType === 'video',
-                'thumbnail_url' => ($mediaType === 'video' &&
-                    method_exists($media, 'getThumbnailUrlAttribute'))
-                    ? $media->thumbnail_url
+                'thumbnail_url' => ($mediaType === 'video' && method_exists($specificMedia, 'getThumbnailUrlAttribute'))
+                    ? $specificMedia->thumbnail_url
                     : null,
             ]);
 
