@@ -87,22 +87,30 @@ class MediaGallery extends Field
     public function getMediasDisponiveis(): array
     {
         $model = $this->getModelClass();
-        $perPage = config('filament-media-gallery.pagination.per_page', 24);
+        $perPage = 24;
 
-        $mediasPaginadas = $model::with('media')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        \Log::info('getMediasDisponiveis', [
+            'modelClass' => $model,
+            'mediaType' => $this->mediaType
+        ]);
+
+        $mediasPaginadas = $model::orderBy('created_at', 'desc')->paginate($perPage);
 
         $medias = collect($mediasPaginadas->items())->map(function ($media) {
-            return [
+            $data = [
                 'id' => $media->id,
-                'url' => $media->url,
-                'nome_original' => $media->nome_original,
+                'url' => $media->url ?? '',
+                'nome_original' => $media->nome_original ?? 'Sem nome',
                 'is_video' => $this->getMediaType() === 'video',
-                'thumbnail_url' => $this->getMediaType() === 'video' && method_exists($media, 'getThumbnailUrlAttribute')
-                    ? $media->thumbnail_url
-                    : null,
             ];
+
+            if ($this->getMediaType() === 'video' && method_exists($media, 'getThumbnailUrlAttribute')) {
+                $data['thumbnail_url'] = $media->thumbnail_url;
+            }
+
+            \Log::info('Media mapeada', $data);
+
+            return $data;
         });
 
         return [
@@ -110,7 +118,6 @@ class MediaGallery extends Field
             'temMais' => $mediasPaginadas->hasMorePages()
         ];
     }
-
     // Getters
     public function getMediaType(): string
     {

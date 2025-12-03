@@ -15,12 +15,22 @@
     $dadosIniciaisGaleria = $getMediasDisponiveis();
 
    // IMPORTANTE: Busca apenas as mídias DO TIPO CORRETO que já estão selecionadas
-   $mediasSelecionadasInicialmente = $modelClass::find($getState() ?? [])->map(fn ($media) => [
-       'id' => $media->id,
-       'url' => $media->url,
-       'nome_original' => $media->nome_original,
-       'is_video' => $mediaType === 'video',
-   ]);
+   $mediasSelecionadasInicialmente = collect($getState() ?? [])
+    ->map(function($id) use ($modelClass, $mediaType) {
+        $media = $modelClass::find($id);
+        if (!$media) return null;
+
+        return [
+            'id' => $media->id,
+            'url' => $media->url ?? '',
+            'nome_original' => $media->nome_original ?? 'Sem nome',
+            'is_video' => $mediaType === 'video',
+            'thumbnail_url' => $mediaType === 'video' && method_exists($media, 'getThumbnailUrlAttribute')
+                ? $media->thumbnail_url
+                : null,
+        ];
+    })
+    ->filter(); // Remove nulls
 
    $fieldId = 'galeria-midia-' . $getStatePath();
 @endphp
