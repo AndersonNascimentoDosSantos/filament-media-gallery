@@ -371,4 +371,91 @@ trait HasMediaGallery
             return ['media' => [], 'hasMore' => false];
         }
     }
+
+    /**
+     * Syncs the images relationship based on the data from the form.
+     */
+    protected function syncImages(): void
+    {
+        $this->syncMedia('image');
+    }
+
+    /**
+     * Syncs the videos relationship based on the data from the form.
+     */
+    protected function syncVideos(): void
+    {
+        $this->syncMedia('video');
+    }
+
+    /**
+     * Generic method to sync media relationships (many-to-many).
+     *
+     * @param string $type 'image' or 'video'
+     */
+    private function syncMedia(string $type): void
+    {
+        // Determine the data key and relationship name dynamically.
+        $dataKey = ($type === 'image') ? 'image_ids' : 'video_ids';
+        $relationshipName = ($type === 'image') ? 'images' : 'videos';
+
+        \Log::info("MediaGallerySync: Starting sync for {$type}s.", [
+            'record_id' => $this->record->id,
+            'data_key' => $dataKey,
+            'raw_data' => $this->data[$dataKey] ?? 'not set'
+        ]);
+
+        if (!method_exists($this->record, $relationshipName)) {
+            \Log::error("MediaGallerySync: Relationship '{$relationshipName}' does not exist on the model.", [
+                'model' => get_class($this->record)
+            ]);
+            return;
+        }
+
+        $mediaIds = [];
+        $rawIds = $this->data[$dataKey] ?? [];
+
+        // Handle data coming as a JSON string or an array.
+        if (is_string($rawIds)) {
+            $decoded = json_decode($rawIds, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $mediaIds = $decoded;
+            } else {
+                \Log::warning("MediaGallerySync: Failed to decode JSON string for {$type} IDs.", [
+                    'raw' => $rawIds,
+                    'error' => json_last_error_msg()
+                ]);
+            }
+        } elseif (is_array($rawIds)) {
+            $mediaIds = $rawIds;
+        } elseif (is_numeric($rawIds)) {
+            $mediaIds = [$rawIds];
+        }
+
+        // Clean and validate the IDs.
+        $sanitizedIds = collect($mediaIds)
+            ->filter(fn ($id) => !empty($id) && is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        \Log::info("MediaGallerySync: Processed {$type} IDs for syncing.", [
+            'sanitized_ids' => $sanitizedIds,
+            'count' => count($sanitizedIds)
+        ]);
+
+        try {
+            // Use sync() to manage the many-to-many relationship.
+            $this->record->{$relationshipName}()->sync($sanitizedIds);
+
+            \Log::info("MediaGallerySync: {$type}s synced successfully.", [
+                'total' => count($sanitizedIds)
+            ]);
+        } catch (\Exception $e) {
+            \Log::error("MediaGallerySync: Error while syncing {$type}s.", [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
 }
