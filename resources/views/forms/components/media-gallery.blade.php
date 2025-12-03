@@ -77,7 +77,7 @@
 
                         <div class="g-thumbnail-actions">
                             @if($allowImageEditor)
-                                <button type="button" x-show="mediaType === 'image' && !media.is_video"
+                                <button type="button" x-show="!media.is_video"
                                         @click.stop="abrirEditor(media.id, media.url)"
                                         title="Editar Imagem"
                                         class="g-thumbnail-btn-edit">
@@ -399,11 +399,11 @@
                 // Recebe mídias FILTRADAS por tipo
                 Livewire.on('galeria:medias-atualizadas', ({ medias }) => {
                     console.log('🔄 Recebendo mídias filtradas:', medias);
-                    medias.forEach(mediaDaGaleria => {
+                    medias.forEach(media => {
                         // Só adiciona se for do tipo correto
-                        if (mediaDaGaleria.is_video === (this.mediaType === 'video')) {
-                            if (!this.mediasDisponiveis.some(local => local.id === mediaDaGaleria.id)) {
-                                this.mediasDisponiveis.push(mediaDaGaleria);
+                        if (media.is_video === (this.mediaType === 'video')) {
+                            if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
+                                this.mediasDisponiveis.push(media);
                             }
                         }
                     });
