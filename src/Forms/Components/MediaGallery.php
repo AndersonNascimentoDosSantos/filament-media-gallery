@@ -26,25 +26,25 @@ class MediaGallery extends Field
 
     protected array $imageEditorAspectRatios = ['16:9', '4:3', '1:1'];
 
-//    protected function setUp(): void
-//    {
-//        parent::setUp();
-//
-//        // Carrega os IDs do relacionamento quando o formulário é preenchido.
-//        $this->loadStateFromRelationshipsUsing(static function (MediaGallery $component, ?Model $record): void {
-//            if (! $record) {
-//                return;
-//            }
-//
-//            $relationship = $component->getRelationship($record);
-//
-//            if (! $relationship instanceof BelongsToMany) {
-//                return;
-//            }
-//
-//            $component->state($relationship->get()->pluck('id')->all());
-//        });
-//    }
+    //    protected function setUp(): void
+    //    {
+    //        parent::setUp();
+    //
+    //        // Carrega os IDs do relacionamento quando o formulário é preenchido.
+    //        $this->loadStateFromRelationshipsUsing(static function (MediaGallery $component, ?Model $record): void {
+    //            if (! $record) {
+    //                return;
+    //            }
+    //
+    //            $relationship = $component->getRelationship($record);
+    //
+    //            if (! $relationship instanceof BelongsToMany) {
+    //                return;
+    //            }
+    //
+    //            $component->state($relationship->get()->pluck('id')->all());
+    //        });
+    //    }
 
     /**
      * Define o tipo de mídia (image ou video)
