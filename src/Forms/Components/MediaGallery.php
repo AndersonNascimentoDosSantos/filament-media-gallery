@@ -4,11 +4,13 @@ namespace Devanderson\FilamentMediaGallery\Forms\Components;
 
 use Devanderson\FilamentMediaGallery\Models\Image;
 use Devanderson\FilamentMediaGallery\Models\Video;
+use Devanderson\FilamentMediaGallery\Traits\HasRelationships;
 use Filament\Forms\Components\Field;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MediaGallery extends Field
 {
+    use HasRelationships;
     protected string $view = 'filament-media-gallery::forms.components.media-gallery';
 
     protected string $mediaType = 'image'; // 'image' ou 'video'
