@@ -420,10 +420,13 @@
                     if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
                         // Adiciona no início para que apareça primeiro.
                         this.mediasDisponiveis.unshift(media);
+                        // Se o novo item também estiver na lista de selecionados, adiciona-o aos objetos.
+                        if (this.isSelected(media.id) && !this.selectedMediaObjects.some(m => m.id === media.id)) {
+                            this.selectedMediaObjects.unshift(media);
+                        }
                     }
-                    if (this.isSelected(media.id)) {
-                        this.syncSelectedObjects();
-                    }
+                    // Força a sincronização para garantir que a nova mídia selecionada seja exibida.
+                    this.syncSelectedObjects();
                 });
             },
 
@@ -478,9 +481,13 @@
             },
 
             syncSelectedObjects() {
-                this.selectedMediaObjects = this.selecionadas
-                    .map(id => this.mediasDisponiveis.find(media => media.id == id))
-                    .filter(Boolean); // filter(Boolean) remove quaisquer 'undefined' se um ID não for encontrado
+                // Combina as mídias da galeria e as mídias já selecionadas para garantir que todos os IDs possam ser encontrados.
+                const allAvailableMedia = [...this.selectedMediaObjects, ...this.mediasDisponiveis];
+                const uniqueMedia = allAvailableMedia.filter((media, index, self) =>
+                    index === self.findIndex((m) => m.id === media.id)
+                );
+
+                this.selectedMediaObjects = this.selecionadas.map(id => uniqueMedia.find(media => media.id == id)).filter(Boolean);
                 console.log('Syncing selected objects:', this.selectedMediaObjects);
             },
 
