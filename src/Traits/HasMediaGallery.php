@@ -5,11 +5,13 @@ namespace Devanderson\FilamentMediaGallery\Traits;
 use Devanderson\FilamentMediaGallery\Models\Video;
 use Devanderson\FilamentMediaGallery\Models\Image as Imagem;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Concerns\HasRelationships;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HasMediaGallery
 {
+    use HasRelationships;
     /**
      * Cache for field configurations to avoid repeated lookups.
      */
