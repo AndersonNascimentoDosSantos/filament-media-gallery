@@ -10,8 +10,6 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HasMediaGallery
 {
-
-
     /**
      * Cache for field configurations to avoid repeated lookups.
      */
