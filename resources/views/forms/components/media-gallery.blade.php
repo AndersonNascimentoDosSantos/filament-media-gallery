@@ -15,11 +15,12 @@
     $dadosIniciaisGaleria = $getMediasDisponiveis();
 
    // IMPORTANTE: Busca apenas as mídias DO TIPO CORRETO que já estão selecionadas
-   $mediasSelecionadasInicialmente = $modelClass::find($getState() ?? [])->map(fn ($media) => [
+   $initialSelectedMediaObjects = $modelClass::find($getState() ?? [])->map(fn ($media) => [
        'id' => $media->id,
        'url' => $media->url,
-       'nome_original' => $media->nome_original,
+       'original_name' => $media->original_name,
        'is_video' => $mediaType === 'video',
+       'thumbnail_url' => $mediaType === 'video' ? $media->thumbnail_url : null,
    ]);
 
    $fieldId = 'galeria-midia-' . $getStatePath();
@@ -30,9 +31,10 @@
         wire:key="{{ $fieldId }}"
         wire:ignore.self
         x-data="imageGalleryPicker({
-             state: $wire.get('{{ $getStatePath() }}') || [],
+             state: @js($getState() ?? []),
              statePath: '{{ $getStatePath() }}',
              mediaType: @js($mediaType),
+             initialSelectedMedia: @js($initialSelectedMediaObjects),
              initialMedias: @js($dadosIniciaisGaleria['medias']),
              temMaisPaginas: @js($dadosIniciaisGaleria['temMais']),
              allowMultiple: @js($allowMultiple),
@@ -42,23 +44,23 @@
         x-init="init()"
     >
         {{-- Mídias Selecionadas --}}
-        <div x-show="selecionadas.length > 0" class="g-section">
+        <div x-show="selectedMediaObjects.length > 0" class="g-section">
             <label class="g-label">
                 <span x-text="mediaType === 'image' ? '📸 Imagens Selecionadas' : '🎬 Vídeos Selecionados'"></span>
             </label>
             <div class="g-grid">
-                {{-- Renderiza as mídias disponíveis e o Alpine controla a visibilidade --}}
-                <template x-for="media in mediasDisponiveis" :key="media.id">
-                    <div x-show="isSelected(media.id)" class="g-thumbnail g-thumbnail-selected group">
+                {{-- Renderiza diretamente os objetos de mídia selecionados --}}
+                <template x-for="media in selectedMediaObjects" :key="media.id">
+                    <div class="g-thumbnail g-thumbnail-selected group">
                         {{-- Preview de Imagem --}}
-                        <template x-if="mediaType === 'image' && !media.is_video">
-                            <img :src="media.url" :alt="media.nome_original">
+                        <template x-if="!media.is_video">
+                            <img :src="media.url" :alt="media.original_name">
                         </template>
                         {{-- Preview de Vídeo (usa thumbnail se disponível) --}}
-                        <template x-if="mediaType === 'video' && media.is_video">
+                        <template x-if="media.is_video">
                             <div class="g-video-preview">
                                 <template x-if="media.thumbnail_url">
-                                    <img :src="media.thumbnail_url" :alt="media.nome_original" class="g-video-thumbnail">
+                                    <img :src="media.thumbnail_url" :alt="media.original_name" class="g-video-thumbnail">
                                 </template>
                                 <template x-if="!media.thumbnail_url">
                                     <div class="g-video-placeholder">
@@ -75,7 +77,7 @@
 
                         <div class="g-thumbnail-actions">
                             @if($allowImageEditor)
-                                <button type="button" x-show="mediaType === 'image' && !media.is_video"
+                                <button type="button" x-show="!media.is_video"
                                         @click.stop="abrirEditor(media.id, media.url)"
                                         title="Editar Imagem"
                                         class="g-thumbnail-btn-edit">
@@ -94,7 +96,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="g-thumbnail-name" x-text="media.nome_original"></div>
+                        <div class="g-thumbnail-name" x-text="media.original_name"></div>
                     </div>
                 </template>
             </div>
@@ -202,13 +204,13 @@
                                      :class="{ 'g-modal-thumb-selected': isSelected(media.id) }"
                                      class="g-modal-thumb">
                                     {{-- Exibe imagem OU vídeo baseado no mediaType do campo --}}
-                                    <template x-if="mediaType === 'image' && !media.is_video">
-                                        <img :src="media.url" :alt="media.nome_original" class="g-modal-thumb-img">
+                                    <template x-if="!media.is_video">
+                                        <img :src="media.url" :alt="media.original_name" class="g-modal-thumb-img">
                                     </template>
-                                    <template x-if="mediaType === 'video' && media.is_video">
+                                    <template x-if="media.is_video">
                                         <div class="g-video-preview g-modal-video-preview">
                                             <template x-if="media.thumbnail_url">
-                                                <img :src="media.thumbnail_url" :alt="media.nome_original" class="g-modal-thumb-img">
+                                                <img :src="media.thumbnail_url" :alt="media.original_name" class="g-modal-thumb-img">
                                             </template>
                                             <template x-if="!media.thumbnail_url">
                                                 <div class="g-video-placeholder g-video-placeholder-modal">
@@ -228,7 +230,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                         </svg>
                                     </div>
-                                    <div class="g-modal-thumb-name" x-text="media.nome_original"></div>
+                                    <div class="g-modal-thumb-name" x-text="media.original_name"></div>
                                 </div>
                             </template>
                         </template>
@@ -365,6 +367,7 @@
     function imageGalleryPicker(config) {
         return {
             selecionadas: config.state,
+            selectedMediaObjects: config.initialSelectedMedia,
             mediasDisponiveis: config.initialMedias,
             modalAberto: false,
             mediaType: config.mediaType, // 'image' ou 'video'
@@ -384,32 +387,46 @@
 
             init() {
                 console.log('🖼️ Galeria Iniciada - Tipo:', this.mediaType, 'Mídias:', this.mediasDisponiveis.length);
-                console.log('Estado inicial:', JSON.parse(JSON.stringify(this.selecionadas)));
+                // Força a sincronização inicial para garantir que os objetos sejam carregados
+                this.syncSelectedObjects();
+                console.log('Estado inicial (IDs):', JSON.parse(JSON.stringify(this.selecionadas)));
+                console.log('Objetos Iniciais:', JSON.parse(JSON.stringify(this.selectedMediaObjects)));
+
 
                 this.$watch('$wire.get(\'' + config.statePath + '\')', (newState) => {
-                    this.selecionadas = newState || [];
+                    if (newState && JSON.stringify(this.selecionadas) !== JSON.stringify(newState)) {
+                        this.selecionadas = newState || [];
+                        this.syncSelectedObjects();
+                    }
                 });
 
-                // Recebe mídias FILTRADAS por tipo
-                Livewire.on('galeria:medias-atualizadas', ({ medias }) => {
+                // Ouve o evento de sincronização para atualizar a lista de mídias, se necessário.
+                Livewire.on('gallery:media-synced', ({ type, ids }) => {
                     console.log('🔄 Recebendo mídias filtradas:', medias);
-                    medias.forEach(mediaDaGaleria => {
+                    medias.forEach(media => {
                         // Só adiciona se for do tipo correto
-                        if (mediaDaGaleria.is_video === (this.mediaType === 'video')) {
-                            if (!this.mediasDisponiveis.some(local => local.id === mediaDaGaleria.id)) {
-                                this.mediasDisponiveis.push(mediaDaGaleria);
+                        if (media.is_video === (this.mediaType === 'video')) {
+                            if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
+                                this.mediasDisponiveis.push(media);
                             }
                         }
                     });
                 });
 
-                Livewire.on('galeria:media-adicionada', ({ media }) => {
+                Livewire.on('gallery:media-added', ({ media }) => {
                     console.log('✨ Nova mídia adicionada:', media);
                     // Verifica se é do tipo correto antes de adicionar
                     if (media.is_video === (this.mediaType === 'video')) {
                         if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
-                            this.mediasDisponiveis.push(media);
+                            this.mediasDisponiveis.unshift(media);
                         }
+                        // Se o novo item também estiver na lista de selecionados, adiciona-o aos objetos.
+                        if (this.isSelected(media.id) && !this.selectedMediaObjects.some(m => m.id === media.id)) {
+                            this.selectedMediaObjects.unshift(media);
+                        }
+                        // Força a sincronização para garantir que a nova mídia selecionada seja exibida.
+                        this.syncSelectedObjects();
+
                     }
                 });
             },
@@ -429,7 +446,7 @@
                     );
 
                     this.mediasDisponiveis.push(...mediasFiltradas);
-                    this.temMaisPaginas = resultado.temMais;
+                    this.temMaisPaginas = resultado.hasMore;
                     this.carregandoMais = false;
                     console.log(`Página ${this.paginaAtual} carregada. Total: ${this.mediasDisponiveis.length}`);
                 }).catch(error => {
@@ -460,7 +477,19 @@
                     this.selecionadas = this.isSelected(mediaId) ? [] : [mediaId];
                 }
                 console.log('Estado após toggle:', JSON.parse(JSON.stringify(this.selecionadas)));
+                this.syncSelectedObjects();
                 this.$wire.set(config.statePath, this.selecionadas);
+            },
+
+            syncSelectedObjects() {
+                // Combina as mídias da galeria e as mídias já selecionadas para garantir que todos os IDs possam ser encontrados.
+                const allAvailableMedia = [...this.selectedMediaObjects, ...this.mediasDisponiveis];
+                const uniqueMedia = allAvailableMedia.filter((media, index, self) =>
+                    index === self.findIndex((m) => m.id === media.id)
+                );
+
+                this.selectedMediaObjects = this.selecionadas.map(id => uniqueMedia.find(media => media.id == id)).filter(Boolean);
+                console.log('Syncing selected objects:', this.selectedMediaObjects);
             },
 
             removerMedia(mediaId) {
@@ -469,6 +498,7 @@
                 if (index > -1) {
                     this.selecionadas.splice(index, 1);
                 }
+                this.syncSelectedObjects();
                 this.$wire.set(config.statePath, this.selecionadas);
             },
 
@@ -501,8 +531,8 @@
                     (uploadedFilename) => {
                         console.log('✅ Upload concluído:', uploadedFilename);
                         this.$wire.call('handleNewMediaUpload', uploadedFilename, config.statePath)
-                            .then(() => {
-                                console.log('✨ Processamento concluído');
+                            .finally(() => {
+                                console.log('✨ Processamento concluído (finally)');
                                 this.uploading = false;
                                 this.uploadProgress = '';
                                 event.target.value = '';
