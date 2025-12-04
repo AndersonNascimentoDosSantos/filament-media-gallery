@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrManyThrough;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use LogicException;
-//use Znck\Eloquent\Relations\BelongsToThrough;
+
+// use Znck\Eloquent\Relations\BelongsToThrough;
 
 trait HasRelationships
 {
@@ -135,9 +136,9 @@ trait HasRelationships
                 $relationship->getQualifiedForeignKeyName();
         }
 
-//        if ($relationship instanceof BelongsToThrough) {
-//            return $relationship->getRelated()->getQualifiedKeyName();
-//        }
+        //        if ($relationship instanceof BelongsToThrough) {
+        //            return $relationship->getRelated()->getQualifiedKeyName();
+        //        }
 
         if ($relationship instanceof BelongsTo) {
             return $query?->getModel()->qualifyColumn($relationship->getOwnerKeyName()) ??
