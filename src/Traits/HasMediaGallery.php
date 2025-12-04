@@ -33,33 +33,44 @@ trait HasMediaGallery
             'key' => $key
         ]);
 
-        // Try to access the form if it exists
-        if (property_exists($this, 'form') && method_exists($this, 'form')) {
-            try {
-                $form = $this->form($this->makeForm());
-                $components = $form->getComponents(true);
+        // List of potential form-providing methods to check, in order of priority.
+        $formProviders = [
+            'getMountedTableActionForm', // For table actions (e.g., in Relation Managers)
+            'getMountedActionForm',      // For page actions
+            'form',                      // For main forms (Create/Edit pages)
+        ];
 
-                foreach ($components as $component) {
-                    if ($component->getName() === $key &&
-                        method_exists($component, 'getMediaType')) {
+        foreach ($formProviders as $provider) {
+            if (method_exists($this, $provider)) {
+                try {
+                    $form = $this->{$provider}();
 
-                        $config = [
-                            'mediaType' => $component->getMediaType(),
-                            'modelClass' => $component->getModelClass(),
-                            'allowMultiple' => $component->getAllowMultiple(),
-                            'allowUpload' => $component->getAllowUpload(),
-                            'maxItems' => $component->getMaxItems(),
-                        ];
-
-                        $this->fieldConfigCache[$key] = $config;
-                        \Log::info('MediaGalleryUpload: Configuration obtained from component', $config);
-                        return $config;
+                    // The main 'form' method might need the makeForm() helper.
+                    if ($provider === 'form' && property_exists($this, 'form')) {
+                        $form = $this->form($this->makeForm());
                     }
+
+                    if ($form) {
+                        foreach ($form->getComponents(true) as $component) {
+                            if ($component->getStatePath() === $key && method_exists($component, 'getMediaType')) {
+                                $config = [
+                                    'mediaType' => $component->getMediaType(),
+                                    'modelClass' => $component->getModelClass(),
+                                    'allowMultiple' => $component->getAllowMultiple(),
+                                    'allowUpload' => $component->getAllowUpload(),
+                                    'maxItems' => $component->getMaxItems(),
+                                ];
+                                $this->fieldConfigCache[$key] = $config;
+                                \Log::info("MediaGalleryUpload: Configuration found via '{$provider}'", $config);
+                                return $config;
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning("MediaGalleryUpload: Error accessing form via '{$provider}'", [
+                        'error' => $e->getMessage()
+                    ]);
                 }
-            } catch (\Exception $e) {
-                \Log::warning('MediaGalleryUpload: Error accessing form', [
-                    'error' => $e->getMessage()
-                ]);
             }
         }
 
