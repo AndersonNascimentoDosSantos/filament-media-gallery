@@ -2,8 +2,8 @@
 
 namespace Devanderson\FilamentMediaGallery\Traits;
 
-use Devanderson\FilamentMediaGallery\Models\Video;
 use Devanderson\FilamentMediaGallery\Models\Image as Imagem;
+use Devanderson\FilamentMediaGallery\Models\Video;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Concerns\HasRelationships;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +12,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 trait HasMediaGallery
 {
     use HasRelationships;
+
     /**
      * Cache for field configurations to avoid repeated lookups.
      */
@@ -32,7 +33,7 @@ trait HasMediaGallery
 
         \Log::info('MediaGalleryUpload: Fetching field configuration', [
             'statePath' => $statePath,
-            'key' => $key
+            'key' => $key,
         ]);
 
         // Try to access the form if it exists
@@ -55,12 +56,13 @@ trait HasMediaGallery
 
                         $this->fieldConfigCache[$key] = $config;
                         \Log::info('MediaGalleryUpload: Configuration obtained from component', $config);
+
                         return $config;
                     }
                 }
             } catch (\Exception $e) {
                 \Log::warning('MediaGalleryUpload: Error accessing form', [
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -70,6 +72,7 @@ trait HasMediaGallery
 
         if ($config) {
             $this->fieldConfigCache[$key] = $config;
+
             return $config;
         }
 
@@ -82,7 +85,7 @@ trait HasMediaGallery
     protected function inferFieldConfig(string $fieldName): ?array
     {
         \Log::info('MediaGalleryUpload: Inferring configuration', [
-            'fieldName' => $fieldName
+            'fieldName' => $fieldName,
         ]);
 
         // Detects if it's a video or image field by name
@@ -109,12 +112,12 @@ trait HasMediaGallery
         try {
             \Log::info('MediaGalleryUpload: Starting handleNewMediaUpload', [
                 'uploadedFilename' => $uploadedFilename,
-                'statePath' => $statePath
+                'statePath' => $statePath,
             ]);
 
             $config = $this->getFieldConfig($statePath);
 
-            if (!$config) {
+            if (! $config) {
                 throw new \Exception("Could not get configuration for field '$statePath'.");
             }
 
@@ -125,25 +128,26 @@ trait HasMediaGallery
             \Log::info('MediaGalleryUpload: Field settings', [
                 'mediaType' => $mediaType,
                 'modelClass' => $modelClass,
-                'allowMultiple' => $allowMultiple
+                'allowMultiple' => $allowMultiple,
             ]);
 
             // Remove the 'data.' prefix to access the $this->data array
             $dataKey = str_starts_with($statePath, 'data.') ? substr($statePath, 5) : $statePath;
 
-            if (!$allowMultiple) {
+            if (! $allowMultiple) {
                 $currentState = $this->data[$dataKey] ?? [];
 
                 if (is_string($currentState)) {
                     $currentState = json_decode($currentState, true) ?? [];
                 }
 
-                if (!empty($currentState)) {
+                if (! empty($currentState)) {
                     Notification::make()
                         ->warning()
                         ->title('Limit Reached')
                         ->body('Only one media item is allowed.')
                         ->send();
+
                     return;
                 }
             }
@@ -154,10 +158,10 @@ trait HasMediaGallery
             \Log::info('MediaGalleryUpload: Checking temporary file', [
                 'uploadKey' => $uploadKey,
                 'tempFile_exists' => $tempFile !== null,
-                'tempFile_class' => $tempFile ? get_class($tempFile) : 'null'
+                'tempFile_class' => $tempFile ? get_class($tempFile) : 'null',
             ]);
 
-            if (!$tempFile instanceof TemporaryUploadedFile) {
+            if (! $tempFile instanceof TemporaryUploadedFile) {
                 throw new \Exception('Temporary file not found or invalid.');
             }
 
@@ -165,36 +169,35 @@ trait HasMediaGallery
 
             \Log::info('MediaGalleryUpload: File stored', [
                 'newPath' => $newPath,
-                'original_name' => $tempFile->getClientOriginalName()
+                'original_name' => $tempFile->getClientOriginalName(),
             ]);
 
             // 1. Cria o registro principal na tabela 'media'
-             $media = \Devanderson\FilamentMediaGallery\Models\Media::create([
-                 'type' => $mediaType,
-                 'path' => $newPath,
-                 'original_name' => $tempFile->getClientOriginalName(),
-                 'mime_type' => $tempFile->getMimeType(),
-                 'size' => $tempFile->getSize()
-             ]);
+            $media = \Devanderson\FilamentMediaGallery\Models\Media::create([
+                'type' => $mediaType,
+                'path' => $newPath,
+                'original_name' => $tempFile->getClientOriginalName(),
+                'mime_type' => $tempFile->getMimeType(),
+                'size' => $tempFile->getSize(),
+            ]);
 
-             // 2. Cria o registro específico (Image ou Video) e o associa
-             $specificMedia = new $modelClass();
-             $specificMedia->media_id = $media->id;
-             $specificMedia->save();
+            // 2. Cria o registro específico (Image ou Video) e o associa
+            $specificMedia = new $modelClass;
+            $specificMedia->media_id = $media->id;
+            $specificMedia->save();
 
             if ($mediaType === 'video') {
                 $thumbnail = $this->generateVideoThumbnail($newPath);
-                //dd($thumbnail);
+                // dd($thumbnail);
                 if ($thumbnail) {
                     $specificMedia->update(['thumbnail_path' => $thumbnail]);
                 }
             }
 
-
             \Log::info('MediaGalleryUpload: Media created', [
                 'media_id' => $media->id,
                 'specific_media_id' => $specificMedia->id,
-                'model_class' => get_class($specificMedia)
+                'model_class' => get_class($specificMedia),
             ]);
 
             $currentState = $this->data[$dataKey] ?? [];
@@ -222,13 +225,13 @@ trait HasMediaGallery
             ]);
 
             \Log::info('MediaGalleryUpload: Upload completed successfully', [
-                'media_id' => $media->id
+                'media_id' => $media->id,
             ]);
 
         } catch (\Exception $e) {
             \Log::error('MediaGalleryUpload: Error in handleNewMediaUpload', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -250,7 +253,7 @@ trait HasMediaGallery
             \Log::info('MediaGalleryUpload: Starting handleEditedMediaUpload', [
                 'mediaId' => $mediaId,
                 'fileName' => $fileName,
-                'statePath' => $statePath
+                'statePath' => $statePath,
             ]);
 
             // Remove the 'data.' prefix if it exists
@@ -258,12 +261,12 @@ trait HasMediaGallery
             $uploadKey = $dataKey . '_edited_media';
             $tempFile = $this->data[$uploadKey] ?? null;
 
-            if (!$tempFile instanceof TemporaryUploadedFile) {
+            if (! $tempFile instanceof TemporaryUploadedFile) {
                 throw new \Exception('Edited file not found.');
             }
 
             $image = Imagem::find($mediaId);
-            if (!$image) {
+            if (! $image) {
                 throw new \Exception('The original image was not found.');
             }
 
@@ -289,13 +292,13 @@ trait HasMediaGallery
                 ->send();
 
             \Log::info('MediaGalleryUpload: Image edited successfully', [
-                'image_id' => $image->id
+                'image_id' => $image->id,
             ]);
 
         } catch (\Exception $e) {
             \Log::error('MediaGalleryUpload: Error in handleEditedMediaUpload', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -311,17 +314,17 @@ trait HasMediaGallery
     /**
      * Loads more media for the gallery with pagination, filtered by media type.
      */
-    public function loadMoreMedia(int $page = 1, string $statePath): array
+    public function loadMoreMedia(int $page, string $statePath): array
     {
         try {
             \Log::info('MediaGalleryUpload: Loading more media', [
                 'page' => $page,
-                'statePath' => $statePath
+                'statePath' => $statePath,
             ]);
 
             $config = $this->getFieldConfig($statePath);
 
-            if (!$config) {
+            if (! $config) {
                 throw new \Exception("Could not get configuration for field '$statePath'.");
             }
 
@@ -332,7 +335,7 @@ trait HasMediaGallery
             \Log::info('MediaGalleryUpload: Fetching media', [
                 'mediaType' => $mediaType,
                 'modelClass' => $modelClass,
-                'page' => $page
+                'page' => $page,
             ]);
 
             // Fetches only from the correct model (Image OR Video)
@@ -358,7 +361,7 @@ trait HasMediaGallery
             \Log::info('MediaGalleryUpload: Media loaded', [
                 'mediaType' => $mediaType,
                 'total' => count($mappedMedia),
-                'hasMorePages' => $mediaItems->hasMorePages()
+                'hasMorePages' => $mediaItems->hasMorePages(),
             ]);
 
             return [
@@ -368,8 +371,9 @@ trait HasMediaGallery
         } catch (\Exception $e) {
             \Log::error('MediaGalleryUpload: Error in loadMoreMedia', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return ['media' => [], 'hasMore' => false];
         }
     }
@@ -393,7 +397,7 @@ trait HasMediaGallery
     /**
      * Generic method to sync media relationships (many-to-many).
      *
-     * @param string $type 'image' or 'video'
+     * @param  string  $type  'image' or 'video'
      */
     private function syncMedia(string $type): void
     {
@@ -404,13 +408,14 @@ trait HasMediaGallery
         \Log::info("MediaGallerySync: Starting sync for {$type}s.", [
             'record_id' => $this->record->id,
             'data_key' => $dataKey,
-            'raw_data' => $this->data[$dataKey] ?? 'not set'
+            'raw_data' => $this->data[$dataKey] ?? 'not set',
         ]);
 
-        if (!method_exists($this->record, $relationshipName)) {
+        if (! method_exists($this->record, $relationshipName)) {
             \Log::error("MediaGallerySync: Relationship '{$relationshipName}' does not exist on the model.", [
-                'model' => get_class($this->record)
+                'model' => get_class($this->record),
             ]);
+
             return;
         }
 
@@ -425,7 +430,7 @@ trait HasMediaGallery
             } else {
                 \Log::warning("MediaGallerySync: Failed to decode JSON string for {$type} IDs.", [
                     'raw' => $rawIds,
-                    'error' => json_last_error_msg()
+                    'error' => json_last_error_msg(),
                 ]);
             }
         } elseif (is_array($rawIds)) {
@@ -436,14 +441,14 @@ trait HasMediaGallery
 
         // Clean and validate the IDs.
         $sanitizedIds = collect($mediaIds)
-            ->filter(fn ($id) => !empty($id) && is_numeric($id))
+            ->filter(fn ($id) => ! empty($id) && is_numeric($id))
             ->map(fn ($id) => (int) $id)
             ->values()
             ->all();
 
         \Log::info("MediaGallerySync: Processed {$type} IDs for syncing.", [
             'sanitized_ids' => $sanitizedIds,
-            'count' => count($sanitizedIds)
+            'count' => count($sanitizedIds),
         ]);
 
         try {
@@ -453,17 +458,17 @@ trait HasMediaGallery
             // Dispara um evento para notificar o frontend que a sincronização ocorreu.
             $this->dispatch('gallery:media-synced', type: $type, ids: $sanitizedIds);
             \Log::info("MediaGallerySync: {$type}s synced successfully.", [
-                'total' => count($sanitizedIds)
+                'total' => count($sanitizedIds),
             ]);
         } catch (\Exception $e) {
             \Log::error("MediaGallerySync: Error while syncing {$type}s.", [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
 
-//    protected function afterCreate(): void
-//    {
-//        $this->syncImages(); // Sincroniza o relacionamento 'images'
-//    }
+    //    protected function afterCreate(): void
+    //    {
+    //        $this->syncImages(); // Sincroniza o relacionamento 'images'
+    //    }
 }
