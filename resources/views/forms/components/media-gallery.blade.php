@@ -416,18 +416,21 @@
                 Livewire.on('gallery:media-added', ({ media }) => {
                     console.log('✨ Nova mídia adicionada:', media);
                     // Verifica se é do tipo correto antes de adicionar
-                    if (media.is_video === (this.mediaType === 'video')) {
-                        if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
-                            this.mediasDisponiveis.unshift(media);
-                        }
-                        // Se o novo item também estiver na lista de selecionados, adiciona-o aos objetos.
-                        if (this.isSelected(media.id) && !this.selectedMediaObjects.some(m => m.id === media.id)) {
-                            this.selectedMediaObjects.unshift(media);
-                        }
-                        // Força a sincronização para garantir que a nova mídia selecionada seja exibida.
-                        this.syncSelectedObjects();
 
+                    if (media.is_video !== (this.mediaType === 'video')) {
+                        return;
                     }
+
+
+                    // Adiciona a nova mídia à lista de mídias disponíveis se ainda não existir.
+                    if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
+                        this.mediasDisponiveis.unshift(media);
+                    }
+
+
+                // Força a atualização do estado e a sincronização dos objetos.
+                this.selecionadas = this.$wire.get(config.statePath);
+                this.syncSelectedObjects();
                 });
             },
 
@@ -531,23 +534,12 @@
                     (uploadedFilename) => {
                         console.log('✅ Upload concluído:', uploadedFilename);
                         this.$wire.call('handleNewMediaUpload', uploadedFilename, config.statePath)
-                            .finally(() => {
-                                console.log('✨ Processamento concluído (finally)');
+                            .then(() => {
+                                console.log('✨ Processamento do backend concluído.');
                                 this.uploading = false;
                                 this.uploadProgress = '';
                                 event.target.value = '';
-                            })
-                            .catch((error) => {
-                                console.error('❌ Erro:', error);
-                                this.uploading = false;
-                                this.uploadProgress = '';
-                                event.target.value = '';
-                                new FilamentNotification()
-                                    .title('Erro no Processamento')
-                                    .danger()
-                                    .body('Erro ao processar a mídia.')
-                                    .send();
-                            });
+                                                        });
                     },
                     (error) => {
                         console.error('❌ Erro no upload:', error);

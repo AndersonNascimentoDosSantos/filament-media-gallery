@@ -447,7 +447,7 @@ trait HasMediaGallery
         try {
             // Use sync() to manage the many-to-many relationship.
             $this->record->{$relationshipName}()->sync($sanitizedIds);
-            
+
             // Dispara um evento para notificar o frontend que a sincronização ocorreu.
             $this->dispatch('gallery:media-synced', type: $type, ids: $sanitizedIds);
             \Log::info("MediaGallerySync: {$type}s synced successfully.", [
@@ -460,4 +460,8 @@ trait HasMediaGallery
         }
     }
 
+//    protected function afterCreate(): void
+//    {
+//        $this->syncImages(); // Sincroniza o relacionamento 'images'
+//    }
 }
