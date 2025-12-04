@@ -62,13 +62,14 @@ trait HasMediaGallery
                                 ];
                                 $this->fieldConfigCache[$key] = $config;
                                 \Log::info("MediaGalleryUpload: Configuration found via '{$provider}'", $config);
+
                                 return $config;
                             }
                         }
                     }
                 } catch (\Exception $e) {
                     \Log::warning("MediaGalleryUpload: Error accessing form via '{$provider}'", [
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
                 }
             }
