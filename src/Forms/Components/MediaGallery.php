@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MediaGallery extends Field
 {
-     protected string $view = 'filament-media-gallery::forms.components.media-gallery';
+    protected string $view = 'filament-media-gallery::forms.components.media-gallery';
 
     protected string $mediaType = 'image'; // 'image' ou 'video'
 
