@@ -432,6 +432,23 @@
                 this.selecionadas = this.$wire.get(config.statePath);
                 this.syncSelectedObjects();
                 });
+                // 1. Ouvir o evento emitido pelo trait Livewire
+                $wire.on('gallery:media-added', (event) => {
+                    // A nova mídia é event.media
+                    const newMedia = event.media;
+
+                    // 2. Adicionar o ID ao estado do Filament (que é sincronizado com o Livewire)
+                    // Isso garante que o estado do campo seja persistido.
+                    this.state.push(newMedia.id);
+
+                    // 3. Adicionar o objeto da mídia à lista de 'selecionados' do Alpine
+                    // Isso é o que faz a imagem aparecer imediatamente na view.
+                    this.selectedMediaObjects.push(newMedia);
+
+                    // Opcional: Notificar que o estado foi alterado para garantir que o Filament o capture
+                    this.state = [...this.state];
+                    $wire.set(this.statePath, this.state);
+                });
             },
 
             carregarMais() {
