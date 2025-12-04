@@ -1,4 +1,5 @@
 <?php
+
 namespace Devanderson\FilamentMediaGallery\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -37,11 +38,12 @@ class Media extends Model
      */
     public function getUrlAttribute(): string
     {
-        if (!$this->path) {
+        if (! $this->path) {
             return '';
         }
 
         $disk = config('filament-media-gallery.disk', 'public');
+
         return url(Storage::disk($disk)->url($this->path));
     }
 
