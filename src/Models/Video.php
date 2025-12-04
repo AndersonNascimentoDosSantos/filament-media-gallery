@@ -1,6 +1,5 @@
 <?php
 
-
 // ============================================
 // Video Model
 // ============================================
@@ -62,7 +61,7 @@ class Video extends Model
     {
         $disk = config('filament-media-gallery.disk', 'public');
 
-        return !empty($this->thumbnail_path) &&
+        return ! empty($this->thumbnail_path) &&
             Storage::disk($disk)->exists($this->thumbnail_path);
     }
 

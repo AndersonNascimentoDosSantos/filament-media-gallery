@@ -2,7 +2,8 @@
 
 namespace Devanderson\FilamentMediaGallery;
 
-use Filament\Support\Assets\AlpineComponent;
+use Devanderson\FilamentMediaGallery\Commands\FilamentMediaGalleryCommand;
+use Devanderson\FilamentMediaGallery\Testing\TestsFilamentMediaGallery;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
@@ -13,8 +14,6 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Devanderson\FilamentMediaGallery\Commands\FilamentMediaGalleryCommand;
-use Devanderson\FilamentMediaGallery\Testing\TestsFilamentMediaGallery;
 
 class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
 {
@@ -39,7 +38,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
             });
-//        $package->hasAssets(); // Adicionado: Declara que o pacote tem assets
+        //        $package->hasAssets(); // Adicionado: Declara que o pacote tem assets
 
         $configFileName = $package->shortName();
 
@@ -78,8 +77,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
         FilamentAsset::register([
             Css::make('cropper-css', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css'),
             Js::make('cropper-js', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js'),
-        ],  $this->getAssetPackageName());
-
+        ], $this->getAssetPackageName());
 
         // Icon Registration
         FilamentIcon::register($this->getIcons());
@@ -108,9 +106,9 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [];
-//            Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css'),
-//            Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js'),
-//        ];
+        //            Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css'),
+        //            Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js'),
+        //        ];
     }
 
     /**
@@ -155,7 +153,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
         return [
             '0001_01_01_000004_create_media_table',
             '0001_01_01_000005_create_images_table',
-            '0001_01_01_000006_create_videos_table'
+            '0001_01_01_000006_create_videos_table',
         ];
     }
 }
