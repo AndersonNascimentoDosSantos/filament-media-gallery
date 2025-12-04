@@ -394,7 +394,7 @@
 
 
                 this.$watch('$wire.get(\'' + config.statePath + '\')', (newState) => {
-                    if (newState && JSON.stringify(this.selecionadas) !== JSON.stringify(newState)) {
+                    if (JSON.stringify(this.selecionadas) !== JSON.stringify(newState)) {
                         this.selecionadas = newState || [];
                         this.syncSelectedObjects();
                     }
@@ -416,38 +416,21 @@
                 Livewire.on('gallery:media-added', ({ media }) => {
                     console.log('✨ Nova mídia adicionada:', media);
                     // Verifica se é do tipo correto antes de adicionar
-
                     if (media.is_video !== (this.mediaType === 'video')) {
                         return;
                     }
 
-
                     // Adiciona a nova mídia à lista de mídias disponíveis se ainda não existir.
                     if (!this.mediasDisponiveis.some(local => local.id === media.id)) {
+                        // Adiciona no início para que apareça primeiro.
                         this.mediasDisponiveis.unshift(media);
+                        // Se o novo item também estiver na lista de selecionados, adiciona-o aos objetos.
+                        if (this.isSelected(media.id) && !this.selectedMediaObjects.some(m => m.id === media.id)) {
+                            this.selectedMediaObjects.unshift(media);
+                        }
                     }
-
-
-                // Força a atualização do estado e a sincronização dos objetos.
-                this.selecionadas = this.$wire.get(config.statePath);
-                this.syncSelectedObjects();
-                });
-                // 1. Ouvir o evento emitido pelo trait Livewire
-                $wire.on('gallery:media-added', (event) => {
-                    // A nova mídia é event.media
-                    const newMedia = event.media;
-
-                    // 2. Adicionar o ID ao estado do Filament (que é sincronizado com o Livewire)
-                    // Isso garante que o estado do campo seja persistido.
-                    this.state.push(newMedia.id);
-
-                    // 3. Adicionar o objeto da mídia à lista de 'selecionados' do Alpine
-                    // Isso é o que faz a imagem aparecer imediatamente na view.
-                    this.selectedMediaObjects.push(newMedia);
-
-                    // Opcional: Notificar que o estado foi alterado para garantir que o Filament o capture
-                    this.state = [...this.state];
-                    $wire.set(this.statePath, this.state);
+                    // Força a sincronização para garantir que a nova mídia selecionada seja exibida.
+                    this.syncSelectedObjects();
                 });
             },
 
@@ -512,6 +495,10 @@
                 console.log('Syncing selected objects:', this.selectedMediaObjects);
             },
 
+            findMediaById(id) {
+                return this.mediasDisponiveis.find(media => media.id == id);
+            },
+
             removerMedia(mediaId) {
                 const index = this.selecionadas.indexOf(mediaId);
                 console.log(`Removendo mídia: ${mediaId}, index: ${index}`);
@@ -552,8 +539,8 @@
                         console.log('✅ Upload concluído:', uploadedFilename);
                         this.$wire.call('handleNewMediaUpload', uploadedFilename, config.statePath)
                             .then(() => {
-                                console.log('✨ Processamento do backend concluído.');
-                                this.uploading = false;
+                                console.log('✨ Processamento concluído');
+                                this.uploading = false; // O watcher e o evento 'gallery:media-added' farão a sincronização
                                 this.uploadProgress = '';
                                 event.target.value = '';
                                                         });
