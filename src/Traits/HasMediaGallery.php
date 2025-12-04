@@ -5,7 +5,6 @@ namespace Devanderson\FilamentMediaGallery\Traits;
 use Devanderson\FilamentMediaGallery\Models\Image as Imagem;
 use Devanderson\FilamentMediaGallery\Models\Video;
 use Filament\Notifications\Notification;
-use Filament\Tables\Filters\Concerns\HasRelationship;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
