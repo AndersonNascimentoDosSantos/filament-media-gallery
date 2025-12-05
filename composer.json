@@ -35,7 +35,6 @@
         "filament/forms": "^4.0",
         "spatie/laravel-package-tools": "^1.15.0",
         "filament/filament": "^4.0",
-        "illuminate/contracts": "^11",
         "intervention/image": "^3.0"
     },
     "require-dev": {
