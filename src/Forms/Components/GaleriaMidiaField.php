@@ -11,19 +11,27 @@ class GaleriaMidiaField extends Field
     protected string $view = 'filament-media-gallery::components.galeria-midia-field';
 
     protected string $mediaType = 'image'; // 'image' ou 'video'
+
     protected string $modelClass = Imagem::class;
+
     protected bool $allowUpload = true;
+
     protected bool $allowMultiple = true;
+
     protected ?int $maxItems = null;
+
     protected string $directory = 'uploads';
+
     protected string $disk = 'public';
+
     protected bool $allowImageEditor = false;
+
     protected array $imageEditorAspectRatios = ['16:9', '4:3', '1:1'];
 
     /**
      * Cria uma nova instância do campo com configurações padrão
      */
-    public static function make(string $name = null): static
+    public static function make(?string $name = null): static
     {
         $static = parent::make($name);
 
@@ -41,7 +49,7 @@ class GaleriaMidiaField extends Field
      */
     public function mediaType(string $type): static
     {
-        if (!in_array($type, ['image', 'video'])) {
+        if (! in_array($type, ['image', 'video'])) {
             throw new \InvalidArgumentException("Tipo de mídia inválido. Use 'image' ou 'video'.");
         }
 
@@ -69,30 +77,35 @@ class GaleriaMidiaField extends Field
     public function allowUpload(bool $condition = true): static
     {
         $this->allowUpload = $condition;
+
         return $this;
     }
 
     public function allowMultiple(bool $condition = true): static
     {
         $this->allowMultiple = $condition;
+
         return $this;
     }
 
     public function maxItems(?int $max): static
     {
         $this->maxItems = $max;
+
         return $this;
     }
 
     public function directory(string $directory): static
     {
         $this->directory = $directory;
+
         return $this;
     }
 
     public function disk(string $disk): static
     {
         $this->disk = $disk;
+
         return $this;
     }
 
@@ -102,12 +115,14 @@ class GaleriaMidiaField extends Field
         if ($this->mediaType === 'image') {
             $this->allowImageEditor = $condition;
         }
+
         return $this;
     }
 
     public function imageEditorAspectRatios(array $ratios): static
     {
         $this->imageEditorAspectRatios = $ratios;
+
         return $this;
     }
 
@@ -122,7 +137,7 @@ class GaleriaMidiaField extends Field
         \Log::info('GaleriaMidiaField: Carregando mídias disponíveis', [
             'mediaType' => $this->getMediaType(),
             'modelClass' => $model,
-            'perPage' => $perPage
+            'perPage' => $perPage,
         ]);
 
         // FILTRO CORRETO: busca apenas do modelo específico (Imagem OU Video)
@@ -147,12 +162,12 @@ class GaleriaMidiaField extends Field
         \Log::info('GaleriaMidiaField: Mídias carregadas', [
             'mediaType' => $this->getMediaType(),
             'total' => $medias->count(),
-            'temMais' => $mediasPaginadas->hasMorePages()
+            'temMais' => $mediasPaginadas->hasMorePages(),
         ]);
 
         return [
             'medias' => $medias->toArray(),
-            'temMais' => $mediasPaginadas->hasMorePages()
+            'temMais' => $mediasPaginadas->hasMorePages(),
         ];
     }
 

@@ -2,8 +2,8 @@
 
 namespace Devanderson\FilamentMediaGallery\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
@@ -34,6 +34,7 @@ class Video extends Model
     public function getUrlAttribute(): string
     {
         $disk = config('filament-media-gallery.disk', 'public');
+
         return Storage::disk($disk)->url($this->path);
     }
 
@@ -42,11 +43,12 @@ class Video extends Model
      */
     public function getThumbnailUrlAttribute(): ?string
     {
-        if (!$this->thumbnail_path) {
+        if (! $this->thumbnail_path) {
             return null;
         }
 
         $disk = config('filament-media-gallery.disk', 'public');
+
         return Storage::disk($disk)->url($this->thumbnail_path);
     }
 
@@ -73,7 +75,7 @@ class Video extends Model
      */
     public function getDuracaoFormatadaAttribute(): ?string
     {
-        if (!$this->duracao) {
+        if (! $this->duracao) {
             return null;
         }
 
@@ -128,6 +130,6 @@ class Video extends Model
      */
     public function hasThumbnail(): bool
     {
-        return !empty($this->thumbnail_path);
+        return ! empty($this->thumbnail_path);
     }
 }

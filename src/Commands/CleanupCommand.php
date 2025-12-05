@@ -2,8 +2,8 @@
 
 namespace Devanderson\FilamentMediaGallery\Commands;
 
-use Illuminate\Console\Command;
 use Devanderson\FilamentMediaGallery\Facades\FilamentMediaGallery;
+use Illuminate\Console\Command;
 
 class CleanupCommand extends Command
 {
@@ -39,8 +39,9 @@ class CleanupCommand extends Command
         );
         $this->newLine();
 
-        if (!$dryRun && !$this->confirm('Deseja continuar com a limpeza?', true)) {
+        if (! $dryRun && ! $this->confirm('Deseja continuar com a limpeza?', true)) {
             $this->comment('Operação cancelada.');
+
             return self::SUCCESS;
         }
 
@@ -58,7 +59,7 @@ class CleanupCommand extends Command
         $this->info('✅ Limpeza concluída!');
 
         // Estatísticas após a limpeza
-        if (!$dryRun) {
+        if (! $dryRun) {
             $this->newLine();
             $newStats = FilamentMediaGallery::getStats();
             $this->info('📊 Estatísticas após limpeza:');
@@ -81,6 +82,7 @@ class CleanupCommand extends Command
 
         if ($dryRun) {
             $this->comment('   Verificando arquivos órfãos de imagens...');
+
             // Aqui você poderia implementar uma verificação que não deleta
             return;
         }
@@ -106,13 +108,14 @@ class CleanupCommand extends Command
 
         if ($dryRun) {
             $this->comment('   Verificando arquivos órfãos de vídeos...');
+
             return;
         }
 
         $deleted = FilamentMediaGallery::cleanOrphanVideos();
 
         if (count($deleted) > 0) {
-            $this->warn("   ❌ " . count($deleted) . " arquivo(s) órfão(s) de vídeo deletado(s)");
+            $this->warn('   ❌ ' . count($deleted) . ' arquivo(s) órfão(s) de vídeo deletado(s)');
 
             if ($this->option('verbose')) {
                 foreach ($deleted as $file) {

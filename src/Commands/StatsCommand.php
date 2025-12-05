@@ -2,8 +2,8 @@
 
 namespace Devanderson\FilamentMediaGallery\Commands;
 
-use Illuminate\Console\Command;
 use Devanderson\FilamentMediaGallery\Facades\FilamentMediaGallery;
+use Illuminate\Console\Command;
 
 class StatsCommand extends Command
 {
@@ -70,8 +70,8 @@ class StatsCommand extends Command
 
             $largest = FilamentMediaGallery::getLargest(5, 'image');
 
-            if (!empty($largest['images']) && $largest['images']->count() > 0) {
-                $imageData = $largest['images']->map(fn($img) => [
+            if (! empty($largest['images']) && $largest['images']->count() > 0) {
+                $imageData = $largest['images']->map(fn ($img) => [
                     $img->nome_original,
                     $img->tamanho_formatado,
                     $img->created_at->format('d/m/Y H:i'),
@@ -89,8 +89,8 @@ class StatsCommand extends Command
             $this->info('📈 Top 5 Maiores Vídeos');
             $this->newLine();
 
-            if (!empty($largest['videos']) && $largest['videos']->count() > 0) {
-                $videoData = $largest['videos']->map(fn($video) => [
+            if (! empty($largest['videos']) && $largest['videos']->count() > 0) {
+                $videoData = $largest['videos']->map(fn ($video) => [
                     $video->nome_original,
                     $video->tamanho_formatado,
                     $video->duracao_formatada ?? 'N/A',
@@ -112,7 +112,7 @@ class StatsCommand extends Command
 
             $recent = FilamentMediaGallery::getRecent(5);
 
-            if (!empty($recent['images']) && $recent['images']->count() > 0) {
+            if (! empty($recent['images']) && $recent['images']->count() > 0) {
                 $this->line('📸 <fg=cyan>Imagens:</>');
                 foreach ($recent['images'] as $img) {
                     $this->line("   • {$img->nome_original} - {$img->created_at->diffForHumans()}");
@@ -121,7 +121,7 @@ class StatsCommand extends Command
 
             $this->newLine();
 
-            if (!empty($recent['videos']) && $recent['videos']->count() > 0) {
+            if (! empty($recent['videos']) && $recent['videos']->count() > 0) {
                 $this->line('🎬 <fg=cyan>Vídeos:</>');
                 foreach ($recent['videos'] as $video) {
                     $this->line("   • {$video->nome_original} - {$video->created_at->diffForHumans()}");

@@ -2,16 +2,16 @@
 
 namespace Devanderson\FilamentMediaGallery\Traits;
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 trait ProcessaVideoThumbnail
 {
     /**
      * Gera thumbnail de um vídeo usando FFmpeg
      *
-     * @param string $videoPath Caminho do vídeo no storage
-     * @param float|null $timeInSeconds Tempo em segundos para capturar o frame (null usa config)
+     * @param  string  $videoPath  Caminho do vídeo no storage
+     * @param  float|null  $timeInSeconds  Tempo em segundos para capturar o frame (null usa config)
      * @return string|null Caminho do thumbnail gerado ou null se falhar
      */
     protected function gerarThumbnailVideo(string $videoPath, ?float $timeInSeconds = null): ?string
@@ -21,23 +21,26 @@ trait ProcessaVideoThumbnail
             $disk = config('filament-media-gallery.disk', 'public');
             $thumbnailEnabled = config('filament-media-gallery.video.thumbnail.enabled', true);
 
-            if (!$thumbnailEnabled) {
+            if (! $thumbnailEnabled) {
                 Log::info('ProcessaVideoThumbnail: Geração de thumbnail desabilitada no config');
+
                 return null;
             }
 
             $fullVideoPath = Storage::disk($disk)->path($videoPath);
 
-            if (!file_exists($fullVideoPath)) {
+            if (! file_exists($fullVideoPath)) {
                 Log::error('ProcessaVideoThumbnail: Vídeo não encontrado', [
-                    'path' => $fullVideoPath
+                    'path' => $fullVideoPath,
                 ]);
+
                 return null;
             }
 
             // Verifica se FFmpeg está disponível
-            if (!$this->ffmpegDisponivel()) {
+            if (! $this->ffmpegDisponivel()) {
                 Log::warning('ProcessaVideoThumbnail: FFmpeg não disponível, tentando método alternativo');
+
                 return $this->gerarThumbnailAlternativo($videoPath);
             }
 
@@ -52,7 +55,7 @@ trait ProcessaVideoThumbnail
 
             // Cria diretório se não existir
             $thumbnailDir = dirname($fullThumbnailPath);
-            if (!is_dir($thumbnailDir)) {
+            if (! is_dir($thumbnailDir)) {
                 mkdir($thumbnailDir, 0755, true);
             }
 
@@ -69,14 +72,14 @@ trait ProcessaVideoThumbnail
             );
 
             Log::info('ProcessaVideoThumbnail: Executando FFmpeg', [
-                'command' => $command
+                'command' => $command,
             ]);
 
             exec($command, $output, $returnCode);
 
             if ($returnCode === 0 && file_exists($fullThumbnailPath)) {
                 Log::info('ProcessaVideoThumbnail: Thumbnail gerado com sucesso', [
-                    'thumbnail_path' => $thumbnailPath
+                    'thumbnail_path' => $thumbnailPath,
                 ]);
 
                 // Otimiza a imagem usando config
@@ -87,7 +90,7 @@ trait ProcessaVideoThumbnail
 
             Log::error('ProcessaVideoThumbnail: Erro ao gerar thumbnail', [
                 'return_code' => $returnCode,
-                'output' => $output
+                'output' => $output,
             ]);
 
             return $this->gerarThumbnailAlternativo($videoPath);
@@ -95,8 +98,9 @@ trait ProcessaVideoThumbnail
         } catch (\Exception $e) {
             Log::error('ProcessaVideoThumbnail: Exceção ao gerar thumbnail', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }
@@ -108,6 +112,7 @@ trait ProcessaVideoThumbnail
     {
         $ffmpegPath = config('filament-media-gallery.video.ffmpeg.path', 'ffmpeg');
         exec($ffmpegPath . ' -version 2>&1', $output, $returnCode);
+
         return $returnCode === 0;
     }
 
@@ -121,8 +126,9 @@ trait ProcessaVideoThumbnail
             Log::info('ProcessaVideoThumbnail: Gerando thumbnail alternativo');
 
             // Verifica se Intervention Image está disponível
-            if (!class_exists(\Intervention\Image\Facades\Image::class)) {
+            if (! class_exists(\Intervention\Image\Facades\Image::class)) {
                 Log::warning('ProcessaVideoThumbnail: Intervention Image não disponível');
+
                 return null;
             }
 
@@ -134,7 +140,7 @@ trait ProcessaVideoThumbnail
             $image = \Intervention\Image\Facades\Image::canvas($width, $height, '#667eea');
 
             // Adiciona ícone de play
-            $image->text('▶', $width / 2, $height / 2, function($font) {
+            $image->text('▶', $width / 2, $height / 2, function ($font) {
                 $font->size(120);
                 $font->color('#ffffff');
                 $font->align('center');
@@ -143,7 +149,7 @@ trait ProcessaVideoThumbnail
 
             // Adiciona texto
             $videoName = basename($videoPath);
-            $image->text($videoName, $width / 2, $height - 40, function($font) {
+            $image->text($videoName, $width / 2, $height - 40, function ($font) {
                 $font->size(16);
                 $font->color('#ffffff');
                 $font->align('center');
@@ -155,7 +161,7 @@ trait ProcessaVideoThumbnail
 
             // Cria diretório se não existir
             $thumbnailDir = dirname($fullThumbnailPath);
-            if (!is_dir($thumbnailDir)) {
+            if (! is_dir($thumbnailDir)) {
                 mkdir($thumbnailDir, 0755, true);
             }
 
@@ -163,15 +169,16 @@ trait ProcessaVideoThumbnail
             $image->save($fullThumbnailPath, $quality);
 
             Log::info('ProcessaVideoThumbnail: Thumbnail alternativo gerado', [
-                'thumbnail_path' => $thumbnailPath
+                'thumbnail_path' => $thumbnailPath,
             ]);
 
             return $thumbnailPath;
 
         } catch (\Exception $e) {
             Log::error('ProcessaVideoThumbnail: Erro ao gerar thumbnail alternativo', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -182,13 +189,14 @@ trait ProcessaVideoThumbnail
     protected function otimizarThumbnail(string $fullPath, ?int $maxWidth = null): void
     {
         try {
-            if (!file_exists($fullPath)) {
+            if (! file_exists($fullPath)) {
                 return;
             }
 
             // Verifica se Intervention Image está disponível
-            if (!class_exists(\Intervention\Image\Facades\Image::class)) {
+            if (! class_exists(\Intervention\Image\Facades\Image::class)) {
                 Log::info('ProcessaVideoThumbnail: Intervention Image não disponível para otimização');
+
                 return;
             }
 
@@ -215,12 +223,12 @@ trait ProcessaVideoThumbnail
                 'path' => $fullPath,
                 'width' => $image->width(),
                 'height' => $image->height(),
-                'quality' => $quality
+                'quality' => $quality,
             ]);
 
         } catch (\Exception $e) {
             Log::warning('ProcessaVideoThumbnail: Erro ao otimizar thumbnail', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -228,8 +236,8 @@ trait ProcessaVideoThumbnail
     /**
      * Gera múltiplos thumbnails em diferentes momentos do vídeo
      *
-     * @param string $videoPath Caminho do vídeo
-     * @param int $quantidade Quantidade de thumbnails a gerar
+     * @param  string  $videoPath  Caminho do vídeo
+     * @param  int  $quantidade  Quantidade de thumbnails a gerar
      * @return array Array com os caminhos dos thumbnails gerados
      */
     protected function gerarMultiplosThumbnails(string $videoPath, int $quantidade = 5): array
@@ -239,9 +247,10 @@ trait ProcessaVideoThumbnail
         try {
             $duracao = $this->obterDuracaoVideo($videoPath);
 
-            if (!$duracao) {
+            if (! $duracao) {
                 Log::warning('ProcessaVideoThumbnail: Não foi possível obter duração do vídeo');
                 $thumbnail = $this->gerarThumbnailVideo($videoPath);
+
                 return $thumbnail ? [$thumbnail] : [];
             }
 
@@ -257,12 +266,12 @@ trait ProcessaVideoThumbnail
             }
 
             Log::info('ProcessaVideoThumbnail: Múltiplos thumbnails gerados', [
-                'quantidade' => count($thumbnails)
+                'quantidade' => count($thumbnails),
             ]);
 
         } catch (\Exception $e) {
             Log::error('ProcessaVideoThumbnail: Erro ao gerar múltiplos thumbnails', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
 
@@ -275,7 +284,7 @@ trait ProcessaVideoThumbnail
     protected function obterDuracaoVideo(string $videoPath): ?float
     {
         try {
-            if (!$this->ffmpegDisponivel()) {
+            if (! $this->ffmpegDisponivel()) {
                 return null;
             }
 
@@ -293,15 +302,16 @@ trait ProcessaVideoThumbnail
             exec($command, $output, $returnCode);
 
             if ($returnCode === 0 && isset($output[0])) {
-                return (float)$output[0];
+                return (float) $output[0];
             }
 
             return null;
 
         } catch (\Exception $e) {
             Log::error('ProcessaVideoThumbnail: Erro ao obter duração', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -311,7 +321,7 @@ trait ProcessaVideoThumbnail
      */
     protected function deletarThumbnail(?string $thumbnailPath): void
     {
-        if (!$thumbnailPath) {
+        if (! $thumbnailPath) {
             return;
         }
 
@@ -321,12 +331,12 @@ trait ProcessaVideoThumbnail
             if (Storage::disk($disk)->exists($thumbnailPath)) {
                 Storage::disk($disk)->delete($thumbnailPath);
                 Log::info('ProcessaVideoThumbnail: Thumbnail deletado', [
-                    'path' => $thumbnailPath
+                    'path' => $thumbnailPath,
                 ]);
             }
         } catch (\Exception $e) {
             Log::warning('ProcessaVideoThumbnail: Erro ao deletar thumbnail', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
