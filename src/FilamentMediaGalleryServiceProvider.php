@@ -2,18 +2,15 @@
 
 namespace Devanderson\FilamentMediaGallery;
 
-use Devanderson\FilamentMediaGallery\Commands\FilamentMediaGalleryCommand;
-use Devanderson\FilamentMediaGallery\Testing\TestsFilamentMediaGallery;
-use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Filesystem\Filesystem;
-use Livewire\Features\SupportTesting\Testable;
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Devanderson\FilamentMediaGallery\Commands\InstallCommand;
+use Devanderson\FilamentMediaGallery\Commands\CleanupCommand;
+use Devanderson\FilamentMediaGallery\Commands\StatsCommand;
+use Devanderson\FilamentMediaGallery\Forms\Components\GaleriaMidiaField;
 
 class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
 {
@@ -23,76 +20,47 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
-        $package->name(static::$name)
-            ->hasCommands($this->getCommands())
-            ->hasInstallCommand(function (InstallCommand $command) {
-                $command
-                    ->publishConfigFile()
-//                    ->publishAssets() // Adicionado: Publica os assets do pacote
-                    ->publishMigrations()
-                    ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub('devanderson/filament-media-gallery');
-            });
-        //        $package->hasAssets(); // Adicionado: Declara que o pacote tem assets
-
-        $configFileName = $package->shortName();
-
-        if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
-            $package->hasConfigFile();
-        }
-
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
-        }
-
-        if (file_exists($package->basePath('/../resources/lang'))) {
-            $package->hasTranslations();
-        }
-
-        if (file_exists($package->basePath('/../resources/views'))) {
-            $package->hasViews(static::$viewNamespace);
-        }
+        $package
+            ->name(static::$name)
+            ->hasConfigFile()
+            ->hasViews(static::$viewNamespace)
+            ->hasTranslations()
+            ->hasMigrations([
+                'create_imagens_table',
+                'create_videos_table',
+            ])
+            ->hasCommands([
+                InstallCommand::class,
+                CleanupCommand::class,
+                StatsCommand::class,
+            ]);
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        // Registra a classe principal do plugin como singleton
+        $this->app->singleton(FilamentMediaGallery::class, function ($app) {
+            return new FilamentMediaGallery();
+        });
+
+        // Registra o alias da facade
+        $this->app->alias(FilamentMediaGallery::class, 'filament-media-gallery');
+    }
 
     public function packageBooted(): void
     {
-        // Asset Registration
-        FilamentAsset::register(
-            $this->getAssets(),
-            $this->getAssetPackageName()
-        );
-
-        FilamentAsset::registerScriptData(
-            $this->getScriptData(),
-            $this->getAssetPackageName()
-        );
-        // Registrar apenas Cropper.js (CDN externo)
+        // Registra os assets do Cropper.js
         FilamentAsset::register([
             Css::make('cropper-css', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css'),
             Js::make('cropper-js', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js'),
-        ], $this->getAssetPackageName());
+        ], package: 'filament-media-gallery');
 
-        // Icon Registration
-        FilamentIcon::register($this->getIcons());
-
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-media-gallery/{$file->getFilename()}"),
-                ], 'filament-media-gallery-stubs');
-            }
+        // Registra o componente de formulário
+        if (class_exists(\Filament\Forms\Components\Field::class)) {
+            \Filament\Forms\Components\Field::macro('galeriaMidia', function () {
+                return new GaleriaMidiaField($this->getName());
+            });
         }
-
-        // Testing
-        Testable::mixin(new TestsFilamentMediaGallery);
     }
 
     protected function getAssetPackageName(): ?string
@@ -101,59 +69,13 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
     }
 
     /**
-     * @return array<Asset>
-     */
-    protected function getAssets(): array
-    {
-        return [];
-        //            Css::make('filament-media-gallery-styles', __DIR__ . '/../resources/dist/filament-media-gallery.css'),
-        //            Js::make('filament-media-gallery-scripts', __DIR__ . '/../resources/dist/filament-media-gallery.js'),
-        //        ];
-    }
-
-    /**
-     * @return array<class-string>
-     */
-    protected function getCommands(): array
-    {
-        return [
-            FilamentMediaGalleryCommand::class,
-        ];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getIcons(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getRoutes(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
-    /**
      * @return array<string>
      */
     protected function getMigrations(): array
     {
         return [
-            '0001_01_01_000004_create_media_table',
-            '0001_01_01_000005_create_images_table',
-            '0001_01_01_000006_create_videos_table',
+            'create_imagens_table',
+            'create_videos_table',
         ];
     }
 }
