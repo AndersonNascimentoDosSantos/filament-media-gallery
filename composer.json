@@ -17,10 +17,10 @@
         "filament-media-gallery"
     ],
     "type": "library",
-    "homepage": "https://github.com/devanderson/filament-media-gallery",
+    "homepage": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery",
     "support": {
-        "issues": "https://github.com/devanderson/filament-media-gallery/issues",
-        "source": "https://github.com/devanderson/filament-media-gallery"
+        "issues": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery/issues",
+        "source": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery"
     },
     "license": "MIT",
     "authors": [
