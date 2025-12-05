@@ -2,15 +2,15 @@
 
 namespace Devanderson\FilamentMediaGallery;
 
+use Devanderson\FilamentMediaGallery\Commands\CleanupCommand;
+use Devanderson\FilamentMediaGallery\Commands\InstallCommand;
+use Devanderson\FilamentMediaGallery\Commands\StatsCommand;
+use Devanderson\FilamentMediaGallery\Forms\Components\GaleriaMidiaField;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Devanderson\FilamentMediaGallery\Commands\InstallCommand;
-use Devanderson\FilamentMediaGallery\Commands\CleanupCommand;
-use Devanderson\FilamentMediaGallery\Commands\StatsCommand;
-use Devanderson\FilamentMediaGallery\Forms\Components\GaleriaMidiaField;
 
 class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
 {
@@ -40,7 +40,7 @@ class FilamentMediaGalleryServiceProvider extends PackageServiceProvider
     {
         // Registra a classe principal do plugin como singleton
         $this->app->singleton(FilamentMediaGallery::class, function ($app) {
-            return new FilamentMediaGallery();
+            return new FilamentMediaGallery;
         });
 
         // Registra o alias da facade

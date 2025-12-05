@@ -1,9 +1,10 @@
 <?php
 
 namespace Devanderson\FilamentMediaGallery;
-use Illuminate\Support\Facades\Storage;
+
 use Devanderson\FilamentMediaGallery\Models\Imagem;
 use Devanderson\FilamentMediaGallery\Models\Video;
+use Illuminate\Support\Facades\Storage;
 
 class FilamentMediaGallery
 {
@@ -26,18 +27,20 @@ class FilamentMediaGallery
     /**
      * Obtém todas as imagens
      */
-    public function getImages(int $perPage = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getImages(?int $perPage = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $perPage = $perPage ?? config('filament-media-gallery.gallery.per_page', 24);
+
         return Imagem::orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     /**
      * Obtém todos os vídeos
      */
-    public function getVideos(int $perPage = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getVideos(?int $perPage = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $perPage = $perPage ?? config('filament-media-gallery.gallery.per_page', 24);
+
         return Video::orderBy('created_at', 'desc')->paginate($perPage);
     }
 
@@ -64,7 +67,7 @@ class FilamentMediaGallery
     {
         $imagem = Imagem::find($id);
 
-        if (!$imagem) {
+        if (! $imagem) {
             return false;
         }
 
@@ -78,7 +81,7 @@ class FilamentMediaGallery
     {
         $video = Video::find($id);
 
-        if (!$video) {
+        if (! $video) {
             return false;
         }
 
@@ -244,7 +247,7 @@ class FilamentMediaGallery
     /**
      * Formata bytes em formato legível
      */
-    public function formatBytes(int|float $bytes, int $precision = 2): string
+    public function formatBytes(int | float $bytes, int $precision = 2): string
     {
         if ($bytes >= 1073741824) {
             return number_format($bytes / 1073741824, $precision) . ' GB';
@@ -263,7 +266,7 @@ class FilamentMediaGallery
     public function isValidImage(string $mimeType): bool
     {
         $allowedTypes = config('filament-media-gallery.image.allowed_extensions', [
-            'jpg', 'jpeg', 'png', 'gif', 'webp'
+            'jpg', 'jpeg', 'png', 'gif', 'webp',
         ]);
 
         $extension = explode('/', $mimeType)[1] ?? '';
@@ -278,7 +281,7 @@ class FilamentMediaGallery
     public function isValidVideo(string $mimeType): bool
     {
         $allowedTypes = config('filament-media-gallery.video.allowed_extensions', [
-            'mp4', 'webm', 'ogg'
+            'mp4', 'webm', 'ogg',
         ]);
 
         $extension = explode('/', $mimeType)[1] ?? '';
@@ -290,7 +293,7 @@ class FilamentMediaGallery
     /**
      * Obtém configuração do plugin
      */
-    public function config(string $key = null, $default = null)
+    public function config(?string $key = null, $default = null)
     {
         if ($key === null) {
             return config('filament-media-gallery');
@@ -305,6 +308,7 @@ class FilamentMediaGallery
     public function hasFFmpeg(): bool
     {
         exec('ffmpeg -version 2>&1', $output, $returnCode);
+
         return $returnCode === 0;
     }
 
@@ -313,7 +317,7 @@ class FilamentMediaGallery
      */
     public function getFFmpegInfo(): ?array
     {
-        if (!$this->hasFFmpeg()) {
+        if (! $this->hasFFmpeg()) {
             return null;
         }
 

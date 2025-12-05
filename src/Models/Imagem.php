@@ -33,6 +33,7 @@ class Imagem extends Model
     public function getUrlAttribute(): string
     {
         $disk = config('filament-media-gallery.disk', 'public');
+
         return Storage::disk($disk)->url($this->path);
     }
 
