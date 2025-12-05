@@ -1,101 +1,38 @@
 <?php
 
-use Devanderson\FilamentMediaGallery\Models\Image;
-use Devanderson\FilamentMediaGallery\Models\Media;
-use Devanderson\FilamentMediaGallery\Models\Video;
-
+// config for Devanderson/FilamentMediaGallery
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Storage Disk
-    |--------------------------------------------------------------------------
-    */
+    // Disco de armazenamento
     'disk' => env('MEDIA_GALLERY_DISK', 'public'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Storage Paths
-    |--------------------------------------------------------------------------
-    */
-    'paths' => [
-        'images' => 'gallery/images',
-        'videos' => 'gallery/videos',
-        'thumbnails' => 'gallery/thumbnails',
-    ],
+    // Caminho de armazenamento
+    'path' => env('MEDIA_GALLERY_PATH', 'galeria'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Image Settings
-    |--------------------------------------------------------------------------
-    */
-    'images' => [
-        'max_size' => 10240, // KB (10MB)
-        'allowed_mimes' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-        'allowed_extensions' => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-
+    // Configurações de imagens
+    'image' => [
+        'allowed_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        'max_size' => 10240, // KB
         'editor' => [
             'enabled' => true,
-            'aspect_ratios' => ['16:9', '4:3', '1:1', '3:2'],
+            'aspect_ratios' => ['16:9', '4:3', '1:1', '9:16'],
         ],
+    ],
 
-        'optimization' => [
+    // Configurações de vídeos
+    'video' => [
+        'allowed_extensions' => ['mp4', 'webm', 'ogg'],
+        'max_size' => 102400, // KB
+        'thumbnail' => [
             'enabled' => true,
-            'quality' => 85,
-            'max_width' => 1920,
-            'max_height' => 1080,
+            'time' => 1.0,
+            'width' => 640,
         ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Video Settings
-    |--------------------------------------------------------------------------
-    */
-    'videos' => [
-        'max_size' => 256000, // KB (256MB)
-        'allowed_mimes' => ['video/mp4', 'video/webm', 'video/quicktime'],
-        'allowed_extensions' => ['mp4', 'webm', 'mov'],
-
-        'thumbnails' => [
-            'enabled' => true,
-            'time_offset' => 1.0, // segundos
-            'fallback_placeholder' => true,
-        ],
-
-        'ffmpeg' => [
-            'enabled' => true,
-            'binary_path' => env('FFMPEG_PATH', 'ffmpeg'),
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Models
-    |--------------------------------------------------------------------------
-    */
-    'models' => [
-        'media' => Media::class,
-        'image' => Image::class,
-        'video' => Video::class,
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Table Names
-    |--------------------------------------------------------------------------
-    */
-    'table_names' => [
-        'media' => 'media',
-        'images' => 'images',
-        'videos' => 'videos',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Pagination
-    |--------------------------------------------------------------------------
-    */
-    'pagination' => [
+    // Paginação da galeria
+    'gallery' => [
         'per_page' => 24,
+        'allow_multiple' => true,
+        'max_items' => null,
     ],
 ];

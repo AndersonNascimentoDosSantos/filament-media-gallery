@@ -31,7 +31,7 @@
         wire:key="{{ $fieldId }}"
         wire:ignore.self
         x-data="imageGalleryPicker({
-             state: $wire.get('{{ $getStatePath() }}') || [],
+             state: @js($getState() ?? []),
              statePath: '{{ $getStatePath() }}',
              mediaType: @js($mediaType),
              initialSelectedMedia: @js($initialSelectedMediaObjects),
@@ -387,7 +387,11 @@
 
             init() {
                 console.log('🖼️ Galeria Iniciada - Tipo:', this.mediaType, 'Mídias:', this.mediasDisponiveis.length);
-                console.log('Estado inicial:', JSON.parse(JSON.stringify(this.selecionadas)));
+                // Força a sincronização inicial para garantir que os objetos sejam carregados
+                this.syncSelectedObjects();
+                console.log('Estado inicial (IDs):', JSON.parse(JSON.stringify(this.selecionadas)));
+                console.log('Objetos Iniciais:', JSON.parse(JSON.stringify(this.selectedMediaObjects)));
+
 
                 this.$watch('$wire.get(\'' + config.statePath + '\')', (newState) => {
                     if (JSON.stringify(this.selecionadas) !== JSON.stringify(newState)) {
@@ -396,8 +400,8 @@
                     }
                 });
 
-                // Recebe mídias FILTRADAS por tipo
-                Livewire.on('galeria:medias-atualizadas', ({ medias }) => {
+                // Ouve o evento de sincronização para atualizar a lista de mídias, se necessário.
+                Livewire.on('gallery:media-synced', ({ type, ids }) => {
                     console.log('🔄 Recebendo mídias filtradas:', medias);
                     medias.forEach(media => {
                         // Só adiciona se for do tipo correto
@@ -445,7 +449,7 @@
                     );
 
                     this.mediasDisponiveis.push(...mediasFiltradas);
-                    this.temMaisPaginas = resultado.temMais;
+                    this.temMaisPaginas = resultado.hasMore;
                     this.carregandoMais = false;
                     console.log(`Página ${this.paginaAtual} carregada. Total: ${this.mediasDisponiveis.length}`);
                 }).catch(error => {
@@ -539,18 +543,7 @@
                                 this.uploading = false; // O watcher e o evento 'gallery:media-added' farão a sincronização
                                 this.uploadProgress = '';
                                 event.target.value = '';
-                            })
-                            .catch((error) => {
-                                console.error('❌ Erro:', error);
-                                this.uploading = false;
-                                this.uploadProgress = '';
-                                event.target.value = '';
-                                new FilamentNotification()
-                                    .title('Erro no Processamento')
-                                    .danger()
-                                    .body('Erro ao processar a mídia.')
-                                    .send();
-                            });
+                                                        });
                     },
                     (error) => {
                         console.error('❌ Erro no upload:', error);

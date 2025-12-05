@@ -1,12 +1,22 @@
 {
     "name": "devanderson/filament-media-gallery",
-    "description": "An advanced media gallery plugin for Filament v4 with full support for images and videos, an integrated image editor, and automatic video thumbnail generation.",
+    "description": "A comprehensive media gallery plugin for Filament with image editing, video support, and thumbnail generation.",
     "keywords": [
+        "filament",
+        "laravel",
+        "media",
+        "gallery",
+        "image",
+        "video",
+        "upload",
+        "cropper",
+        "thumbnail",
         "devanderson",
         "laravel",
         "filamentphp",
         "filament-media-gallery"
     ],
+    "type": "library",
     "homepage": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery",
     "support": {
         "issues": "https://github.com/AndersonNascimentoDosSantos/filament-media-gallery/issues",
@@ -24,22 +34,16 @@
         "php": "^8.2",
         "filament/forms": "^4.0",
         "spatie/laravel-package-tools": "^1.15.0",
-        "intervention/image": "^2.7"
+        "filament/filament": "^4.0",
+        "intervention/image": "^3.0"
     },
     "require-dev": {
-        "larastan/larastan": "^3.0",
-        "laravel/pint": "^1.0",
         "nunomaduro/collision": "^8.0",
         "orchestra/testbench": "^9.0|^10.0",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-arch": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.0",
-        "pestphp/pest-plugin-livewire": "^3.0",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "rector/rector": "^2.0",
-        "spatie/laravel-ray": "^1.26"
+        "pestphp/pest-plugin-livewire": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -54,12 +58,9 @@
     },
     "scripts": {
         "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "analyse": "phpstan analyse",
         "lint": "pint",
-        "refactor": "rector",
         "test": "pest",
-        "test:lint": "pint --test",
-        "test:refactor": "rector --dry-run"
+        "test:lint": "pint --test"
     },
     "extra": {
         "laravel": {
